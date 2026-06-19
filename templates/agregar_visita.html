@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Agendar Visita - Sistema Inmobiliario</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
+</head>
+<body>
+
+    {% include 'navbar.html' %}
+
+    <div class="container">
+
+        <a href="/visitas" class="btn-volver">← Volver a visitas</a>
+
+        <h1>Agendar visita</h1>
+
+        {% if not propiedades %}
+        <div class="flash flash-warning">
+            No tienes propiedades registradas. <a href="/agregar" style="color:#fcd34d;">Agregar una propiedad</a> primero.
+        </div>
+        {% elif not clientes %}
+        <div class="flash flash-warning">
+            No tienes clientes registrados. <a href="/clientes/agregar" style="color:#fcd34d;">Agregar un cliente</a> primero.
+        </div>
+        {% else %}
+
+        <form method="POST" action="/visitas/agregar">
+
+            <label>Propiedad</label><br>
+            <select name="propiedad_id" required>
+                <option value="">-- Selecciona una propiedad --</option>
+                {% for prop in propiedades %}
+                <option value="{{ prop.id }}">{{ prop.nombre }} - {{ prop.ciudad }}</option>
+                {% endfor %}
+            </select><br><br>
+
+            <label>Cliente</label><br>
+            <select name="cliente_id" required>
+                <option value="">-- Selecciona un cliente --</option>
+                {% for cliente in clientes %}
+                <option value="{{ cliente.id }}">{{ cliente.nombre }}</option>
+                {% endfor %}
+            </select><br><br>
+
+            <label>Fecha</label><br>
+            <input type="date" name="fecha" required><br><br>
+
+            <label>Hora</label><br>
+            <input type="time" name="hora" required><br><br>
+
+            <label>Notas adicionales</label><br>
+            <textarea name="notas" rows="3" placeholder="Instrucciones, detalles de la visita..."></textarea><br><br>
+
+            <button type="submit">Agendar visita</button>
+
+        </form>
+        {% endif %}
+
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Calculadora de Comisión - Sistema Inmobiliario</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
+</head>
+<body>
+
+    {% include 'navbar.html' %}
+
+    <div class="container" style="max-width:700px;">
+
+        <h1>🧮 Calculadora de Comisión</h1>
+        <p>Calcula tu ganancia según el precio de la propiedad y tu porcentaje de comisión.</p>
+
+        <div class="detalle-card" style="margin-top:24px;">
+
+            <div class="campo">
+                <label>Precio de la propiedad (USD)</label>
+                <input type="number" id="precio" placeholder="Ej: 150000" oninput="calcular()">
+            </div>
+
+            <div class="campo">
+                <label>Porcentaje de comisión (%)</label>
+                <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:8px;">
+                    <button class="btn-porcentaje active" onclick="setPorcentaje(1)">1%</button>
+                    <button class="btn-porcentaje" onclick="setPorcentaje(2)">2%</button>
+                    <button class="btn-porcentaje" onclick="setPorcentaje(3)">3%</button>
+                    <button class="btn-porcentaje" onclick="setPorcentaje(5)">5%</button>
+                    <button class="btn-porcentaje" onclick="setPorcentaje(10)">10%</button>
+                </div>
+                <input type="number" id="porcentaje" value="1" min="0" max="100" step="0.5" oninput="calcular()" style="margin-top:10px;">
+            </div>
+
+            <div class="campo">
+                <label>Tipo de operación</label>
+                <select id="operacion" onchange="calcular()">
+                    <option value="venta">Venta</option>
+                    <option value="alquiler">Alquiler mensual</option>
+                </select>
+            </div>
+
+            <!-- RESULTADO -->
+            <div class="resultado-card" id="resultado" style="display:none;">
+                <div class="resultado-fila">
+                    <span class="detalle-label">Precio de la propiedad</span>
+                    <span id="res-precio" style="color:#f1f5f9; font-size:16px;"></span>
+                </div>
+                <div class="resultado-fila">
+                    <span class="detalle-label">Porcentaje de comisión</span>
+                    <span id="res-porcentaje" style="color:#f1f5f9; font-size:16px;"></span>
+                </div>
+                <div class="resultado-fila" style="border-top:1px solid #1f2937; padding-top:16px; margin-top:8px;">
+                    <span class="detalle-label">Tu comisión</span>
+                    <span id="res-comision" style="color:#60a5fa; font-size:28px; font-weight:bold;"></span>
+                </div>
+                <div id="res-anual-container" style="display:none;">
+                    <div class="resultado-fila">
+                        <span class="detalle-label">Comisión anual (12 meses)</span>
+                        <span id="res-anual" style="color:#86efac; font-size:18px; font-weight:bold;"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- HISTORIAL -->
+            <div style="margin-top:28px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                    <span class="detalle-label">Historial de cálculos</span>
+                    <button onclick="limpiarHistorial()" style="background:transparent; border:none; color:#64748b; cursor:pointer; font-size:13px;">Limpiar</button>
+                </div>
+                <div id="historial" style="display:flex; flex-direction:column; gap:8px;">
+                    <p style="color:#64748b; font-size:13px; text-align:left;">No hay cálculos aún.</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+    let historial = [];
+
+    function setPorcentaje(val) {
+        document.getElementById('porcentaje').value = val;
+        document.querySelectorAll('.btn-porcentaje').forEach(b => b.classList.remove('active'));
+        event.target.classList.add('active');
+        calcular();
+    }
+
+    function formatear(num) {
+        return '$' + num.toLocaleString('es-PY', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function calcular() {
+        const precio = parseFloat(document.getElementById('precio').value);
+        const porcentaje = parseFloat(document.getElementById('porcentaje').value);
+        const operacion = document.getElementById('operacion').value;
+
+        if (!precio || !porcentaje || precio <= 0 || porcentaje <= 0) {
+            document.getElementById('resultado').style.display = 'none';
+            return;
+        }
+
+        const comision = precio * porcentaje / 100;
+
+        document.getElementById('res-precio').textContent = formatear(precio);
+        document.getElementById('res-porcentaje').textContent = porcentaje + '%';
+        document.getElementById('res-comision').textContent = formatear(comision);
+        document.getElementById('resultado').style.display = 'block';
+
+        if (operacion === 'alquiler') {
+            const anual = comision * 12;
+            document.getElementById('res-anual').textContent = formatear(anual);
+            document.getElementById('res-anual-container').style.display = 'block';
+        } else {
+            document.getElementById('res-anual-container').style.display = 'none';
+        }
+
+        // Agregar al historial
+        const entrada = { precio, porcentaje, comision, operacion };
+        if (historial.length === 0 || JSON.stringify(historial[historial.length-1]) !== JSON.stringify(entrada)) {
+            historial.push(entrada);
+            renderHistorial();
+        }
+    }
+
+    function renderHistorial() {
+        const div = document.getElementById('historial');
+        if (historial.length === 0) {
+            div.innerHTML = '<p style="color:#64748b; font-size:13px; text-align:left;">No hay cálculos aún.</p>';
+            return;
+        }
+        div.innerHTML = historial.slice().reverse().map(h => `
+            <div class="historial-item">
+                <span style="color:#94a3b8; font-size:13px;">${h.operacion === 'venta' ? '🏠 Venta' : '🔑 Alquiler'} — ${formatear(h.precio)} al ${h.porcentaje}%</span>
+                <span style="color:#60a5fa; font-weight:bold;">${formatear(h.comision)}</span>
+            </div>
+        `).join('');
+    }
+
+    function limpiarHistorial() {
+        historial = [];
+        renderHistorial();
+    }
+    </script>
+
+</body>
+</html>

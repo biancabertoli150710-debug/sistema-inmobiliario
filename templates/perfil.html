@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Mi Perfil - Sistema Inmobiliario</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
+</head>
+<body>
+
+    {% include 'navbar.html' %}
+
+    <div class="container">
+
+        <!-- DATOS DEL USUARIO -->
+        <div class="perfil-card">
+            <div class="perfil-avatar">{{ session.get('nombre')[0].upper() }}</div>
+            <div>
+                <h2 style="color:#f8fafc; margin-bottom:4px;">{{ session.get('nombre') }}</h2>
+                <p style="color:#64748b; text-align:left; margin:0;">{{ usuario.email }}</p>
+                {% if usuario.telefono %}
+                <p style="color:#64748b; text-align:left; margin:4px 0 0;">📞 +{{ usuario.telefono }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- PROPIEDADES DEL USUARIO -->
+        <h2 style="color:#f8fafc; margin-top:40px; margin-bottom:20px;">Mis propiedades ({{ propiedades|length }})</h2>
+
+        {% if propiedades %}
+        <div class="grid" style="width:100%; margin:0;">
+            {% for prop in propiedades %}
+            <div class="propiedad">
+                <a href="/propiedad/{{ prop.id }}" style="text-decoration:none;">
+                    <img src="{{ url_for('static', filename='uploads/' + prop.imagen) }}"
+                         alt="Imagen"
+                         style="width:100%; height:200px; object-fit:cover; border-radius:10px;">
+                </a>
+                <div style="padding:12px;">
+                    <div style="display:flex; gap:8px; margin-bottom:8px;">
+                        <span class="badge badge-tipo">{{ prop.tipo }}</span>
+                        <span class="badge badge-operacion">{{ prop.operacion }}</span>
+                    </div>
+                    <h3>{{ prop.nombre }} - {{ prop.ciudad }}</h3>
+                    <p>💵 {{ prop.precio }}</p>
+                    <div style="display:flex; gap:8px; margin-top:10px;">
+                        <a href="/editar/{{ prop.id }}" class="btn-editar">✏️ Editar</a>
+                        <form method="POST" action="/eliminar/{{ prop.id }}" onsubmit="return confirmarEliminar()">
+                            <button type="submit" class="btn btn-danger">🗑 Eliminar</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p style="color:#64748b;">No tienes propiedades publicadas aún. <a href="/agregar" style="color:#60a5fa;">Agregar una</a></p>
+        {% endif %}
+
+    </div>
+
+    <script>
+    function confirmarEliminar() {
+        return confirm('¿Estás seguro de que quieres eliminar esta propiedad?');
+    }
+    </script>
+
+</body>
+</html>

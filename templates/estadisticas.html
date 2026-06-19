@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Estadísticas - Sistema Inmobiliario</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    {% include 'navbar.html' %}
+
+    <div class="container" style="max-width:1100px;">
+
+        <h1>📊 Panel de Estadísticas</h1>
+        <p>Resumen visual de todas las propiedades del sistema.</p>
+
+        <div class="stats-graficos">
+
+            <!-- TIPO -->
+            <div class="grafico-card">
+                <h3>Propiedades por tipo</h3>
+                <canvas id="graficoPorTipo"></canvas>
+            </div>
+
+            <!-- ESTADO -->
+            <div class="grafico-card">
+                <h3>Propiedades por estado</h3>
+                <canvas id="graficoPorEstado"></canvas>
+            </div>
+
+            <!-- OPERACION -->
+            <div class="grafico-card">
+                <h3>Venta vs Alquiler</h3>
+                <canvas id="graficoPorOperacion"></canvas>
+            </div>
+
+            <!-- CIUDAD -->
+            <div class="grafico-card">
+                <h3>Propiedades por ciudad</h3>
+                <canvas id="graficoPorCiudad"></canvas>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+    const colores = [
+        '#3b82f6', '#60a5fa', '#86efac', '#fcd34d',
+        '#f87171', '#a78bfa', '#34d399', '#fb923c'
+    ];
+
+    // TIPO
+    const tipoLabels = {{ tipos | map(attribute='tipo') | list | tojson }};
+    const tipoData = {{ tipos | map(attribute='total') | list | tojson }};
+
+    new Chart(document.getElementById('graficoPorTipo'), {
+        type: 'doughnut',
+        data: {
+            labels: tipoLabels,
+            datasets: [{
+                data: tipoData,
+                backgroundColor: colores,
+                borderColor: '#0f172a',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            plugins: {
+                legend: { labels: { color: '#e2e8f0' } }
+            }
+        }
+    });
+
+    // ESTADO
+    const estadoLabels = {{ estados | map(attribute='estado') | list | tojson }};
+    const estadoData = {{ estados | map(attribute='total') | list | tojson }};
+    const estadoColores = estadoLabels.map(e =>
+        e === 'Disponible' ? '#86efac' : e === 'Reservada' ? '#fcd34d' : '#f87171'
+    );
+
+    new Chart(document.getElementById('graficoPorEstado'), {
+        type: 'pie',
+        data: {
+            labels: estadoLabels,
+            datasets: [{
+                data: estadoData,
+                backgroundColor: estadoColores,
+                borderColor: '#0f172a',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            plugins: {
+                legend: { labels: { color: '#e2e8f0' } }
+            }
+        }
+    });
+
+    // OPERACION
+    const opLabels = {{ operaciones | map(attribute='operacion') | list | tojson }};
+    const opData = {{ operaciones | map(attribute='total') | list | tojson }};
+
+    new Chart(document.getElementById('graficoPorOperacion'), {
+        type: 'doughnut',
+        data: {
+            labels: opLabels,
+            datasets: [{
+                data: opData,
+                backgroundColor: ['#3b82f6', '#a78bfa'],
+                borderColor: '#0f172a',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            plugins: {
+                legend: { labels: { color: '#e2e8f0' } }
+            }
+        }
+    });
+
+    // CIUDAD
+    const ciudadLabels = {{ ciudades | map(attribute='ciudad') | list | tojson }};
+    const ciudadData = {{ ciudades | map(attribute='total') | list | tojson }};
+
+    new Chart(document.getElementById('graficoPorCiudad'), {
+        type: 'bar',
+        data: {
+            labels: ciudadLabels,
+            datasets: [{
+                label: 'Propiedades',
+                data: ciudadData,
+                backgroundColor: '#3b82f6',
+                borderRadius: 6
+            }]
+        },
+        options: {
+            plugins: {
+                legend: { labels: { color: '#e2e8f0' } }
+            },
+            scales: {
+                x: { ticks: { color: '#94a3b8' }, grid: { color: '#1f2937' } },
+                y: { ticks: { color: '#94a3b8', stepSize: 1 }, grid: { color: '#1f2937' } }
+            }
+        }
+    });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Consultas - Sistema Inmobiliario</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
+</head>
+<body>
+
+    {% include 'navbar.html' %}
+
+    <div class="container" style="max-width:900px;">
+
+        <h1>💬 Consultas de clientes</h1>
+        <p>Preguntas enviadas sobre tus propiedades.</p>
+
+        {% if consultas %}
+        <div style="display:flex; flex-direction:column; gap:16px; margin-top:24px;">
+            {% for consulta in consultas %}
+            <div class="consulta-card">
+                <div style="display:flex; justify-content:space-between; align-items:start; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
+                    <div>
+                        <span class="detalle-label">Propiedad</span>
+                        <p style="color:#60a5fa; margin:4px 0; text-align:left;">🏠 {{ consulta.prop_nombre }}</p>
+                    </div>
+                    <div style="text-align:right;">
+                        <span class="detalle-label">Cliente</span>
+                        <p style="color:#f1f5f9; margin:4px 0; text-align:right;">👤 {{ consulta.cliente_nombre }}</p>
+                        <p style="color:#64748b; font-size:12px; text-align:right;">{{ consulta.fecha }}</p>
+                    </div>
+                </div>
+
+                <div style="background:#0f172a; border-radius:8px; padding:14px; margin-bottom:12px;">
+                    <span class="detalle-label">Pregunta</span>
+                    <p style="color:#e2e8f0; margin-top:6px; text-align:left; line-height:1.6;">{{ consulta.pregunta }}</p>
+                </div>
+
+                {% if consulta.respuesta %}
+                <div style="background:#052e16; border:1px solid #166534; border-radius:8px; padding:14px;">
+                    <span class="detalle-label" style="color:#86efac;">✅ Tu respuesta</span>
+                    <p style="color:#86efac; margin-top:6px; text-align:left; line-height:1.6;">{{ consulta.respuesta }}</p>
+                </div>
+                {% else %}
+                <form method="POST" action="/consultas/responder/{{ consulta.id }}">
+                    <textarea name="respuesta" rows="3" placeholder="Escribe tu respuesta..." required style="width:100%; margin-top:8px;"></textarea>
+                    <button type="submit" style="margin-top:8px;">Enviar respuesta</button>
+                </form>
+                {% endif %}
+
+            </div>
+            {% endfor %}
+        </div>
+
+        {% else %}
+        <div style="text-align:center; padding:60px 0;">
+            <p style="font-size:48px;">💬</p>
+            <p style="color:#64748b; font-size:16px;">No tienes consultas pendientes aún.</p>
+        </div>
+        {% endif %}
+
+    </div>
+
+</body>
+</html>

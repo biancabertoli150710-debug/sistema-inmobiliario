@@ -1,0 +1,6 @@
+.env
+__pycache__/
+*.pyc
+inmobiliaria.db
+static/uploads/*
+!static/uploads/.gitkeep

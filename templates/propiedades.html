@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista de Propiedades</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
+</head>
+<body>
+
+    {% include 'navbar.html' %}
+
+    <form method="GET" action="/propiedades" style="text-align:center; margin:20px auto; max-width:900px; display:flex; flex-wrap:wrap; gap:10px; justify-content:center;">
+        <input type="text" name="q" placeholder="Buscar por ciudad o nombre" value="{{ request.args.get('q', '') }}">
+
+        <select name="tipo">
+            <option value="">-- Tipo --</option>
+            <option value="Casa" {% if request.args.get('tipo') == 'Casa' %}selected{% endif %}>Casa</option>
+            <option value="Apartamento" {% if request.args.get('tipo') == 'Apartamento' %}selected{% endif %}>Apartamento</option>
+            <option value="Terreno" {% if request.args.get('tipo') == 'Terreno' %}selected{% endif %}>Terreno</option>
+            <option value="Local comercial" {% if request.args.get('tipo') == 'Local comercial' %}selected{% endif %}>Local comercial</option>
+        </select>
+
+        <select name="operacion">
+            <option value="">-- Operación --</option>
+            <option value="Venta" {% if request.args.get('operacion') == 'Venta' %}selected{% endif %}>Venta</option>
+            <option value="Alquiler" {% if request.args.get('operacion') == 'Alquiler' %}selected{% endif %}>Alquiler</option>
+        </select>
+
+        <select name="orden">
+            <option value="">-- Ordenar por precio --</option>
+            <option value="asc" {% if request.args.get('orden') == 'asc' %}selected{% endif %}>Precio: menor a mayor</option>
+            <option value="desc" {% if request.args.get('orden') == 'desc' %}selected{% endif %}>Precio: mayor a menor</option>
+        </select>
+
+        <button type="submit">Buscar</button>
+        <a href="/propiedades" style="padding:10px 16px; background:#1f2937; color:#94a3b8; border-radius:6px; text-decoration:none; font-size:14px;">Limpiar</a>
+    </form>
+
+    <div class="grid">
+        <h1>Lista de Propiedades</h1>
+
+        {% for prop in propiedades %}
+        <div class="propiedad">
+
+            <a href="/propiedad/{{ prop.id }}" style="text-decoration:none;">
+                <img src="{{ url_for('static', filename='uploads/' + prop.imagen) }}"
+                     alt="Imagen de propiedad"
+                     style="width:100%; height:200px; object-fit:cover; border-radius:10px;">
+            </a>
+
+            <div style="padding: 12px;">
+                <div style="display:flex; gap:8px; margin-bottom:8px; flex-wrap:wrap;">
+                    <span class="badge badge-tipo">{{ prop.tipo }}</span>
+                    <span class="badge badge-operacion">{{ prop.operacion }}</span>
+                    {% if prop.estado == 'Disponible' %}
+                        <span class="badge badge-disponible">🟢 Disponible</span>
+                    {% elif prop.estado == 'Reservada' %}
+                        <span class="badge badge-reservada">🟡 Reservada</span>
+                    {% else %}
+                        <span class="badge badge-vendida">🔴 Vendida</span>
+                    {% endif %}
+                </div>
+
+                <a href="/propiedad/{{ prop.id }}" style="text-decoration:none;">
+                    <h3 style="color:#f1f5f9;">{{ prop.nombre }} - {{ prop.ciudad }}</h3>
+                </a>
+                <p>📍 {{ prop.direccion }}</p>
+                <p>🛏 {{ prop.habitaciones }} habitaciones &nbsp;|&nbsp; 💵 {{ prop.precio }}</p>
+                <p style="font-size:13px; color:#64748b; margin-top:4px;">👁 {{ prop.vistas or 0 }} vistas</p>
+                <p style="margin-top:8px; font-size:14px; color:#94a3b8;">{{ prop.descripcion[:100] }}{% if prop.descripcion|length > 100 %}...{% endif %}</p>
+
+                {% if session.get('usuario') %}
+                <div style="display:flex; gap:8px; margin-top:10px;">
+                    <a href="/editar/{{ prop.id }}" class="btn-editar">✏️ Editar</a>
+                    <form method="POST" action="/eliminar/{{ prop.id }}" onsubmit="return confirmarEliminar()">
+                        <button type="submit" class="btn btn-danger">🗑 Eliminar</button>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+
+        </div>
+
+        {% else %}
+        <p>No se encontraron propiedades con esos filtros.</p>
+        {% endfor %}
+
+    </div>
+
+    <script>
+    function confirmarEliminar() {
+        return confirm('¿Estás seguro de que quieres eliminar esta propiedad?');
+    }
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Registrarse - Sistema Inmobiliario</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
+</head>
+<body>
+
+    {% include 'navbar.html' %}
+
+    <div class="container">
+        <div class="auth-card">
+            <h2>Crear cuenta</h2>
+            <p class="auth-sub">Regístrate para empezar a usar el sistema</p>
+
+            <form method="POST" action="/registro">
+                <div class="campo">
+                    <label for="nombre">Nombre completo</label>
+                    <input type="text" id="nombre" name="nombre" placeholder="Tu nombre completo" required>
+                </div>
+                <div class="campo">
+                    <label for="email">Correo electrónico</label>
+                    <input type="email" id="email" name="email" placeholder="correo@ejemplo.com" required>
+                </div>
+                <div class="campo">
+                    <label for="telefono">Número de WhatsApp</label>
+                    <input type="text" id="telefono" name="telefono" placeholder="Ej: 595981234567">
+                </div>
+                <div class="campo">
+                    <label>Tipo de cuenta</label>
+                    <div class="rol-selector">
+                        <label class="rol-opcion">
+                            <input type="radio" name="rol" value="cliente" checked>
+                            <div class="rol-card">
+                                <span style="font-size:28px;">🔍</span>
+                                <span class="rol-titulo">Cliente</span>
+                                <span class="rol-desc">Busco propiedades para comprar o alquilar</span>
+                            </div>
+                        </label>
+                        <label class="rol-opcion">
+                            <input type="radio" name="rol" value="asesor">
+                            <div class="rol-card">
+                                <span style="font-size:28px;">🏠</span>
+                                <span class="rol-titulo">Asesor</span>
+                                <span class="rol-desc">Publico y gestiono propiedades</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+                <div class="campo">
+                    <label for="password">Contraseña</label>
+                    <input type="password" id="password" name="password" placeholder="Mínimo 6 caracteres" required>
+                </div>
+                <div class="campo">
+                    <label for="confirmar">Confirmar contraseña</label>
+                    <input type="password" id="confirmar" name="confirmar" placeholder="Repite tu contraseña" required>
+                </div>
+                <button type="submit" class="btn-primary">Crear cuenta</button>
+            </form>
+
+            <p class="auth-switch">¿Ya tienes cuenta? <a href="/login">Inicia sesión</a></p>
+        </div>
+    </div>
+
+</body>
+</html>

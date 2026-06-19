@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Agenda de Visitas - Sistema Inmobiliario</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
+</head>
+<body>
+
+    {% include 'navbar.html' %}
+
+    <div class="container" style="max-width:1100px;">
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+            <h1 style="margin:0;">📅 Agenda de Visitas</h1>
+            <a href="/visitas/agregar" class="btn-hero-primary" style="text-decoration:none; padding:10px 20px;">+ Agendar visita</a>
+        </div>
+
+        {% if visitas %}
+        <div style="display:flex; flex-direction:column; gap:16px;">
+            {% for visita in visitas %}
+            <div class="visita-card">
+
+                <div style="display:flex; justify-content:space-between; align-items:start; flex-wrap:wrap; gap:12px;">
+                    <div>
+                        <div style="display:flex; gap:8px; margin-bottom:8px;">
+                            {% if visita.estado == 'Pendiente' %}
+                                <span class="badge badge-reservada">⏳ Pendiente</span>
+                            {% elif visita.estado == 'Realizada' %}
+                                <span class="badge badge-disponible">✅ Realizada</span>
+                            {% else %}
+                                <span class="badge badge-vendida">❌ Cancelada</span>
+                            {% endif %}
+                            <span class="badge badge-tipo">📅 {{ visita.fecha }} — 🕐 {{ visita.hora }}</span>
+                        </div>
+
+                        <h3 style="color:#f1f5f9; margin-bottom:4px;">🏠 {{ visita.prop_nombre }}</h3>
+                        <p style="color:#60a5fa; text-align:left; margin:0;">👤 Cliente: {{ visita.cliente_nombre }}</p>
+
+                        {% if visita.notas %}
+                        <p style="color:#64748b; font-size:13px; margin-top:8px; text-align:left;">📝 {{ visita.notas }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                        {% if visita.estado == 'Pendiente' %}
+                        <form method="POST" action="/visitas/estado/{{ visita.id }}/Realizada">
+                            <button type="submit" class="btn-editar" style="border:none; cursor:pointer;">✅ Realizada</button>
+                        </form>
+                        <form method="POST" action="/visitas/estado/{{ visita.id }}/Cancelada">
+                            <button type="submit" class="btn btn-danger" style="padding:8px 14px; border-radius:6px; font-size:13px;">❌ Cancelar</button>
+                        </form>
+                        {% endif %}
+                        <form method="POST" action="/visitas/eliminar/{{ visita.id }}" onsubmit="return confirm('¿Eliminar esta visita?')">
+                            <button type="submit" class="btn btn-danger" style="padding:8px 14px; border-radius:6px; font-size:13px;">🗑</button>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+            {% endfor %}
+        </div>
+
+        {% else %}
+        <div style="text-align:center; padding:60px 0;">
+            <p style="font-size:48px;">📅</p>
+            <p style="color:#64748b; font-size:16px;">No tienes visitas agendadas aún.</p>
+            <a href="/visitas/agregar" class="btn-hero-primary" style="text-decoration:none; padding:10px 24px; display:inline-block; margin-top:16px;">+ Agendar primera visita</a>
+        </div>
+        {% endif %}
+
+    </div>
+
+</body>
+</html>

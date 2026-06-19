@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Agregar Cliente - Sistema Inmobiliario</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
+</head>
+<body>
+
+    {% include 'navbar.html' %}
+
+    <div class="container">
+
+        <a href="/clientes" class="btn-volver">← Volver a clientes</a>
+
+        <h1>Agregar cliente</h1>
+
+        <form method="POST" action="/clientes/agregar">
+
+            <label>Nombre completo</label><br>
+            <input type="text" name="nombre" placeholder="Nombre del cliente" required><br><br>
+
+            <label>Teléfono / WhatsApp</label><br>
+            <input type="text" name="telefono" placeholder="Ej: 595981234567"><br><br>
+
+            <label>¿Qué tipo de propiedad busca?</label><br>
+            <select name="tipo_busca">
+                <option value="">-- Selecciona --</option>
+                <option value="Casa">Casa</option>
+                <option value="Apartamento">Apartamento</option>
+                <option value="Terreno">Terreno</option>
+                <option value="Local comercial">Local comercial</option>
+                <option value="Cualquiera">Cualquiera</option>
+            </select><br><br>
+
+            <label>Presupuesto máximo (USD)</label><br>
+            <input type="text" name="presupuesto" placeholder="Ej: 50000"><br><br>
+
+            <label>Notas adicionales</label><br>
+            <textarea name="notas" rows="4" placeholder="Preferencias, zona buscada, urgencia..."></textarea><br><br>
+
+            <button type="submit">Guardar cliente</button>
+
+        </form>
+
+    </div>
+
+</body>
+</html>

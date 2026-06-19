@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Agregar Propiedad</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body>
+
+    {% include 'navbar.html' %}
+
+<div class="container">
+
+<h1>Agregar nueva propiedad</h1>
+
+<form method="POST" enctype="multipart/form-data" id="form-propiedad">
+
+    <label>Nombre de la propiedad</label><br>
+    <input type="text" name="nombre" id="nombre" required><br><br>
+
+    <label>Ciudad</label><br>
+    <input type="text" name="ciudad" id="ciudad" required><br><br>
+
+    <label>Dirección exacta</label><br>
+    <input type="text" name="direccion" id="direccion" placeholder="Ej: Calle 5 de Mayo 123" required><br><br>
+
+    <label>Tipo de propiedad</label><br>
+    <select name="tipo" id="tipo" required>
+        <option value="">-- Selecciona --</option>
+        <option value="Casa">Casa</option>
+        <option value="Apartamento">Apartamento</option>
+        <option value="Terreno">Terreno</option>
+        <option value="Local comercial">Local comercial</option>
+    </select><br><br>
+
+    <label>Operación</label><br>
+    <select name="operacion" id="operacion" required>
+        <option value="">-- Selecciona --</option>
+        <option value="Venta">Venta</option>
+        <option value="Alquiler">Alquiler</option>
+    </select><br><br>
+
+    <label>Habitaciones</label><br>
+    <input type="number" name="habitaciones" id="habitaciones" required><br><br>
+
+    <label>Precio (USD)</label><br>
+    <input type="text" name="precio" id="precio" required><br><br>
+
+    <label>Descripción</label><br>
+    <div style="display:flex; gap:10px; align-items:center; margin-bottom:8px;">
+        <button type="button" onclick="generarDescripcion()" class="btn-ia" id="btn-ia">
+            ✨ Generar con IA
+        </button>
+        <span id="ia-status" style="font-size:13px; color:#64748b;"></span>
+    </div>
+    <textarea name="descripcion" id="descripcion" rows="4" placeholder="Describe la propiedad o usa IA para generarla..." required></textarea><br><br>
+
+    <label>Imágenes <span style="color:#64748b; font-weight:normal;">(puedes subir hasta 5)</span></label><br>
+    <input type="file" name="imagenes" accept="image/*" multiple><br>
+    <p style="font-size:12px; color:#64748b; margin-top:4px;">Mantén presionado Ctrl para seleccionar varias imágenes</p><br>
+
+    <!-- MAPA -->
+    <label>Ubicación en el mapa <span style="color:#64748b; font-weight:normal;">(haz clic para marcar)</span></label><br>
+    <div id="mapa" style="height:350px; border-radius:10px; margin-top:8px; margin-bottom:12px; border:1px solid #334155;"></div>
+    <input type="hidden" name="latitud" id="latitud">
+    <input type="hidden" name="longitud" id="longitud">
+    <p id="coordenadas" style="font-size:13px; color:#64748b; margin-bottom:16px;">Haz clic en el mapa para seleccionar la ubicación</p>
+
+    <button type="submit">Guardar propiedad</button>
+</form>
+
+</div>
+
+<script>
+    var mapa = L.map('mapa').setView([-27.3364, -55.8675], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap'
+    }).addTo(mapa);
+
+    var marcador = null;
+    mapa.on('click', function(e) {
+        var lat = e.latlng.lat.toFixed(6);
+        var lng = e.latlng.lng.toFixed(6);
+        if (marcador) mapa.removeLayer(marcador);
+        marcador = L.marker([lat, lng]).addTo(mapa);
+        document.getElementById('latitud').value = lat;
+        document.getElementById('longitud').value = lng;
+        document.getElementById('coordenadas').textContent = '📍 Ubicación seleccionada: ' + lat + ', ' + lng;
+        document.getElementById('coordenadas').style.color = '#86efac';
+    });
+
+    async function generarDescripcion() {
+        const nombre = document.getElementById('nombre').value;
+        const ciudad = document.getElementById('ciudad').value;
+        const tipo = document.getElementById('tipo').value;
+        const operacion = document.getElementById('operacion').value;
+        const habitaciones = document.getElementById('habitaciones').value;
+        const precio = document.getElementById('precio').value;
+        const direccion = document.getElementById('direccion').value;
+
+        if (!nombre || !ciudad || !tipo || !operacion) {
+            alert('Completa al menos nombre, ciudad, tipo y operación antes de generar la descripción.');
+            return;
+        }
+
+        const btn = document.getElementById('btn-ia');
+        const status = document.getElementById('ia-status');
+        btn.disabled = true;
+        btn.textContent = '⏳ Generando...';
+        status.textContent = 'La IA está escribiendo la descripción...';
+
+        try {
+            const response = await fetch('/generar-descripcion', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nombre, ciudad, tipo, operacion, habitaciones, precio, direccion })
+            });
+
+            const data = await response.json();
+            if (data.descripcion) {
+                document.getElementById('descripcion').value = data.descripcion;
+                status.textContent = '✅ Descripción generada exitosamente';
+                status.style.color = '#86efac';
+            } else {
+                status.textContent = '❌ Error al generar la descripción';
+                status.style.color = '#fca5a5';
+            }
+        } catch (error) {
+            status.textContent = '❌ Error al generar la descripción';
+            status.style.color = '#fca5a5';
+        }
+
+        btn.disabled = false;
+        btn.textContent = '✨ Generar con IA';
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Editar Propiedad</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body>
+
+    {% include 'navbar.html' %}
+
+    <div class="container">
+
+        <a href="/propiedad/{{ prop.id }}" class="btn-volver">← Volver al detalle</a>
+
+        <h1>Editar propiedad</h1>
+
+        <form method="POST" enctype="multipart/form-data">
+
+            <label>Nombre de la propiedad</label><br>
+            <input type="text" name="nombre" value="{{ prop.nombre }}" required><br><br>
+
+            <label>Ciudad</label><br>
+            <input type="text" name="ciudad" value="{{ prop.ciudad }}" required><br><br>
+
+            <label>Dirección exacta</label><br>
+            <input type="text" name="direccion" value="{{ prop.direccion }}" required><br><br>
+
+            <label>Tipo de propiedad</label><br>
+            <select name="tipo" required>
+                <option value="Casa" {% if prop.tipo == 'Casa' %}selected{% endif %}>Casa</option>
+                <option value="Apartamento" {% if prop.tipo == 'Apartamento' %}selected{% endif %}>Apartamento</option>
+                <option value="Terreno" {% if prop.tipo == 'Terreno' %}selected{% endif %}>Terreno</option>
+                <option value="Local comercial" {% if prop.tipo == 'Local comercial' %}selected{% endif %}>Local comercial</option>
+            </select><br><br>
+
+            <label>Operación</label><br>
+            <select name="operacion" required>
+                <option value="Venta" {% if prop.operacion == 'Venta' %}selected{% endif %}>Venta</option>
+                <option value="Alquiler" {% if prop.operacion == 'Alquiler' %}selected{% endif %}>Alquiler</option>
+            </select><br><br>
+
+            <label>Habitaciones</label><br>
+            <input type="number" name="habitaciones" value="{{ prop.habitaciones }}" required><br><br>
+
+            <label>Precio (USD)</label><br>
+            <input type="text" name="precio" value="{{ prop.precio }}" required><br><br>
+
+            <label>Descripción</label><br>
+            <textarea name="descripcion" rows="4" required>{{ prop.descripcion }}</textarea><br><br>
+
+            <label>Estado de la propiedad</label><br>
+            <select name="estado" required>
+                <option value="Disponible" {% if prop.estado == 'Disponible' %}selected{% endif %}>🟢 Disponible</option>
+                <option value="Reservada" {% if prop.estado == 'Reservada' %}selected{% endif %}>🟡 Reservada</option>
+                <option value="Vendida" {% if prop.estado == 'Vendida' %}selected{% endif %}>🔴 Vendida / Alquilada</option>
+            </select><br><br>
+
+            <!-- IMÁGENES ACTUALES -->
+            {% if imagenes %}
+            <label>Imágenes actuales</label>
+            <div style="display:flex; flex-wrap:wrap; gap:12px; margin-top:8px; margin-bottom:16px;">
+                {% for img in imagenes %}
+                <div style="position:relative;">
+                    <img src="{{ url_for('static', filename='uploads/' + img.nombre) }}"
+                         style="width:120px; height:90px; object-fit:cover; border-radius:8px; border:1px solid #334155;">
+                    <form method="POST" action="/eliminar-imagen/{{ img.id }}" style="position:absolute; top:4px; right:4px;">
+                        <button type="submit" style="background:#ef4444; border:none; color:white; border-radius:4px; cursor:pointer; padding:2px 6px; font-size:12px;">✕</button>
+                    </form>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <label>Agregar nuevas imágenes</label><br>
+            <input type="file" name="imagenes" accept="image/*" multiple><br>
+            <p style="font-size:12px; color:#64748b; margin-top:4px;">Mantén Ctrl para seleccionar varias</p><br>
+
+            <!-- MAPA -->
+            <label>Ubicación en el mapa <span style="color:#64748b; font-weight:normal;">(haz clic para cambiar)</span></label><br>
+            <div id="mapa" style="height:350px; border-radius:10px; margin-top:8px; margin-bottom:12px; border:1px solid #334155;"></div>
+            <input type="hidden" name="latitud" id="latitud" value="{{ prop.latitud or '' }}">
+            <input type="hidden" name="longitud" id="longitud" value="{{ prop.longitud or '' }}">
+            <p id="coordenadas" style="font-size:13px; color:#64748b; margin-bottom:16px;">
+                {% if prop.latitud and prop.longitud %}
+                    📍 Ubicación actual: {{ prop.latitud }}, {{ prop.longitud }}
+                {% else %}
+                    Haz clic en el mapa para seleccionar la ubicación
+                {% endif %}
+            </p>
+
+            <button type="submit">Guardar cambios</button>
+        </form>
+
+    </div>
+
+    <script>
+        var lat = {{ prop.latitud or -27.3364 }};
+        var lng = {{ prop.longitud or -55.8675 }};
+        var zoom = {{ 15 if prop.latitud else 13 }};
+
+        var mapa = L.map('mapa').setView([lat, lng], zoom);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap'
+        }).addTo(mapa);
+
+        var marcador = null;
+
+        {% if prop.latitud and prop.longitud %}
+        marcador = L.marker([{{ prop.latitud }}, {{ prop.longitud }}]).addTo(mapa);
+        {% endif %}
+
+        mapa.on('click', function(e) {
+            var lat = e.latlng.lat.toFixed(6);
+            var lng = e.latlng.lng.toFixed(6);
+            if (marcador) mapa.removeLayer(marcador);
+            marcador = L.marker([lat, lng]).addTo(mapa);
+            document.getElementById('latitud').value = lat;
+            document.getElementById('longitud').value = lng;
+            document.getElementById('coordenadas').textContent = '📍 Nueva ubicación: ' + lat + ', ' + lng;
+            document.getElementById('coordenadas').style.color = '#86efac';
+        });
+    </script>
+
+</body>
+</html>

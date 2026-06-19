@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Sistema Inmobiliario</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
+</head>
+<body>
+
+    {% include 'navbar.html' %}
+
+    <div class="hero">
+        <h1 class="hero-titulo">🏠 Sistema Inmobiliario</h1>
+        <p class="hero-sub">Encuentra la propiedad ideal o publica la tuya de forma rápida y sencilla.</p>
+
+        <div class="hero-botones">
+            <a href="/propiedades" class="btn-hero-primary">Ver propiedades</a>
+            {% if session.get('usuario') %}
+                <a href="/agregar" class="btn-hero-secondary">+ Agregar propiedad</a>
+            {% else %}
+                <a href="/registro" class="btn-hero-secondary">Crear cuenta gratis</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="stats-container">
+        <div class="stat-card">
+            <div class="stat-numero">{{ total_propiedades }}</div>
+            <div class="stat-label">Propiedades publicadas</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-numero">{{ total_usuarios }}</div>
+            <div class="stat-label">Usuarios registrados</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-numero">{{ total_venta }}</div>
+            <div class="stat-label">En venta</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-numero">{{ total_alquiler }}</div>
+            <div class="stat-label">En alquiler</div>
+        </div>
+    </div>
+
+    {% if session.get('usuario') %}
+    <div style="text-align:center; margin: 20px 0 40px;">
+        <p style="color:#60a5fa; font-size:16px;">Bienvenido de nuevo, <strong>{{ session.get('nombre') }}</strong> 👋</p>
+    </div>
+    {% endif %}
+
+</body>
+</html>
+
+
+
+

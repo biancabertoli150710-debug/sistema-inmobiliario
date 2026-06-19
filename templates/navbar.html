@@ -1,0 +1,45 @@
+<nav class="navbar">
+    <ul>
+        <li><a href="/">Inicio</a></li>
+        <li><a href="/propiedades">Propiedades</a></li>
+        {% if session.get('rol') == 'asesor' %}
+        <li><a href="/agregar">Agregar</a></li>
+        {% endif %}
+    </ul>
+
+    <ul class="nav-auth">
+        {% if session.get('usuario') %}
+            <li class="nav-usuario">
+                <span>
+                    {% if session.get('rol') == 'asesor' %}🏠{% else %}🔍{% endif %}
+                    {{ session.get('nombre') }}
+                </span>
+            </li>
+            {% if session.get('rol') == 'asesor' %}
+                <li><a href="/estadisticas" class="btn-nav btn-registro">📊 Estadísticas</a></li>
+                <li><a href="/clientes" class="btn-nav btn-registro">👥 Clientes</a></li>
+                <li><a href="/visitas" class="btn-nav btn-registro">📅 Visitas</a></li>
+                <li><a href="/consultas" class="btn-nav btn-registro">💬 Consultas</a></li>
+                <li><a href="/calculadora" class="btn-nav btn-registro">🧮 Calculadora</a></li>
+            {% else %}
+                <li><a href="/favoritos" class="btn-nav btn-registro">❤️ Favoritos</a></li>
+            {% endif %}
+            <li><a href="/perfil" class="btn-nav btn-registro">Mi perfil</a></li>
+            <li><a href="/logout" class="btn-nav btn-logout">Cerrar sesión</a></li>
+        {% else %}
+            <li><a href="/registro" class="btn-nav btn-registro">Registrarse</a></li>
+            <li><a href="/login" class="btn-nav btn-login">Iniciar sesión</a></li>
+        {% endif %}
+    </ul>
+</nav>
+
+<!-- Mensajes flash -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div class="flash-container">
+            {% for category, message in messages %}
+                <div class="flash flash-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}

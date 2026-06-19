@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Iniciar sesión - Sistema Inmobiliario</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
+</head>
+<body>
+
+    {% include 'navbar.html' %}
+
+    <div class="container">
+        <div class="auth-card">
+            <h2>Iniciar sesión</h2>
+            <p class="auth-sub">Accede a tu cuenta para gestionar propiedades</p>
+
+            <form method="POST" action="/login">
+                <div class="campo">
+                    <label for="email">Correo electrónico</label>
+                    <input type="email" id="email" name="email" placeholder="correo@ejemplo.com" required>
+                </div>
+                <div class="campo">
+                    <label for="password">Contraseña</label>
+                    <input type="password" id="password" name="password" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn-primary">Iniciar sesión</button>
+            </form>
+
+            <p class="auth-switch">¿No tienes cuenta? <a href="/registro">Regístrate aquí</a></p>
+        </div>
+    </div>
+
+</body>
+</html>
