@@ -894,6 +894,259 @@ form button:hover{
     transform: none;
 }
 
+/* ---------------- HERO LANDING ---------------- */
+
+.hero-landing {
+    padding: 90px 20px 70px;
+    background: linear-gradient(135deg, #0f172a 0%, #111827 40%, #1e3a5f 100%);
+    border-bottom: 1px solid #1f2937;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-landing::before {
+    content: '';
+    position: absolute;
+    top: -80px;
+    right: -80px;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(59,130,246,0.15) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.hero-badge {
+    display: inline-block;
+    padding: 6px 16px;
+    background: rgba(59,130,246,0.15);
+    border: 1px solid rgba(59,130,246,0.4);
+    border-radius: 20px;
+    color: #60a5fa;
+    font-size: 13px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.hero-titulo {
+    font-size: 48px;
+    color: #f8fafc;
+    margin-bottom: 16px;
+    line-height: 1.2;
+}
+
+.hero-titulo-azul {
+    color: #60a5fa;
+}
+
+.hero-sub {
+    font-size: 17px;
+    color: #94a3b8;
+    margin-bottom: 36px;
+    max-width: 520px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.6;
+}
+
+.hero-bienvenida {
+    margin-top: 28px;
+    color: #60a5fa;
+    font-size: 15px;
+}
+
+/* ---------------- SECCIONES ---------------- */
+
+.seccion {
+    padding: 70px 20px;
+}
+
+.seccion-oscura {
+    background: #111827;
+    border-top: 1px solid #1f2937;
+    border-bottom: 1px solid #1f2937;
+}
+
+.seccion-header {
+    text-align: center;
+    margin-bottom: 48px;
+}
+
+.seccion-titulo {
+    font-size: 30px;
+    color: #f8fafc;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.seccion-sub {
+    color: #64748b;
+    font-size: 15px;
+    text-align: center;
+}
+
+/* ---------------- CÓMO FUNCIONA ---------------- */
+
+.pasos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 24px;
+    max-width: 960px;
+    margin: 0 auto;
+}
+
+.paso-card {
+    background: #111827;
+    border: 1px solid #1f2937;
+    border-radius: 16px;
+    padding: 32px 24px;
+    text-align: center;
+    transition: transform 0.3s, box-shadow 0.3s;
+    position: relative;
+}
+
+.paso-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 30px rgba(0,0,0,0.5);
+    border-color: #2563eb;
+}
+
+.paso-icono {
+    font-size: 40px;
+    margin-bottom: 12px;
+}
+
+.paso-numero {
+    font-size: 11px;
+    font-weight: bold;
+    color: #3b82f6;
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+}
+
+.paso-titulo {
+    font-size: 20px;
+    color: #f1f5f9;
+    margin-bottom: 10px;
+}
+
+.paso-desc {
+    font-size: 14px;
+    color: #64748b;
+    line-height: 1.6;
+    text-align: center;
+}
+
+/* ---------------- PROPIEDADES DESTACADAS ---------------- */
+
+.destacadas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.destacada-card {
+    background: #0f172a;
+    border: 1px solid #1f2937;
+    border-radius: 14px;
+    overflow: hidden;
+    text-decoration: none;
+    transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
+    display: block;
+}
+
+.destacada-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 14px 32px rgba(0,0,0,0.6);
+    border-color: #2563eb;
+}
+
+.destacada-img-wrap {
+    position: relative;
+    height: 190px;
+    overflow: hidden;
+}
+
+.destacada-img-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s;
+}
+
+.destacada-card:hover .destacada-img-wrap img {
+    transform: scale(1.05);
+}
+
+.destacada-badge-op {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.badge-venta {
+    background: #1e3a5f;
+    color: #60a5fa;
+    border: 1px solid #2563eb;
+}
+
+.badge-alquiler {
+    background: #052e16;
+    color: #86efac;
+    border: 1px solid #16a34a;
+}
+
+.destacada-body {
+    padding: 18px;
+}
+
+.destacada-tipo {
+    font-size: 11px;
+    color: #3b82f6;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+}
+
+.destacada-nombre {
+    font-size: 16px;
+    color: #f1f5f9;
+    margin: 0 0 6px 0;
+    font-weight: bold;
+}
+
+.destacada-ciudad {
+    font-size: 13px;
+    color: #64748b;
+    margin: 0 0 14px 0;
+    text-align: left;
+}
+
+.destacada-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #1f2937;
+    padding-top: 12px;
+}
+
+.destacada-precio {
+    font-size: 16px;
+    font-weight: bold;
+    color: #60a5fa;
+}
+
+.destacada-hab {
+    font-size: 13px;
+    color: #64748b;
+}
+
 /* ---------------- GALERÍA ---------------- */
 
 .galeria {

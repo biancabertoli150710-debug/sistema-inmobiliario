@@ -149,12 +149,16 @@ def inicio():
     total_usuarios = conn.execute("SELECT COUNT(*) FROM usuarios").fetchone()[0]
     total_venta = conn.execute("SELECT COUNT(*) FROM propiedades WHERE operacion='Venta'").fetchone()[0]
     total_alquiler = conn.execute("SELECT COUNT(*) FROM propiedades WHERE operacion='Alquiler'").fetchone()[0]
+    destacadas = conn.execute(
+        "SELECT * FROM propiedades ORDER BY vistas DESC, id DESC LIMIT 3"
+    ).fetchall()
     conn.close()
     return render_template("index.html",
         total_propiedades=total_propiedades,
         total_usuarios=total_usuarios,
         total_venta=total_venta,
-        total_alquiler=total_alquiler
+        total_alquiler=total_alquiler,
+        destacadas=destacadas
     )
 
 

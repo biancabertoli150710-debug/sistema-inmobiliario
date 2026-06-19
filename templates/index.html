@@ -9,20 +9,25 @@
 
     {% include 'navbar.html' %}
 
-    <div class="hero">
-        <h1 class="hero-titulo">🏠 Sistema Inmobiliario</h1>
-        <p class="hero-sub">Encuentra la propiedad ideal o publica la tuya de forma rápida y sencilla.</p>
-
+    <!-- HERO -->
+    <div class="hero hero-landing">
+        <div class="hero-badge">🏠 Plataforma Inmobiliaria</div>
+        <h1 class="hero-titulo">Encontrá tu propiedad<br><span class="hero-titulo-azul">ideal en Paraguay</span></h1>
+        <p class="hero-sub">Comprá, alquilá o publicá propiedades de forma rápida, segura y profesional.</p>
         <div class="hero-botones">
-            <a href="/propiedades" class="btn-hero-primary">Ver propiedades</a>
+            <a href="/propiedades" class="btn-hero-primary">🔍 Ver propiedades</a>
             {% if session.get('usuario') %}
-                <a href="/agregar" class="btn-hero-secondary">+ Agregar propiedad</a>
+                <a href="/agregar" class="btn-hero-secondary">+ Publicar propiedad</a>
             {% else %}
-                <a href="/registro" class="btn-hero-secondary">Crear cuenta gratis</a>
+                <a href="/registro" class="btn-hero-secondary">Crear cuenta gratis →</a>
             {% endif %}
         </div>
+        {% if session.get('usuario') %}
+        <p class="hero-bienvenida">Bienvenido de nuevo, <strong>{{ session.get('nombre') }}</strong> 👋</p>
+        {% endif %}
     </div>
 
+    <!-- ESTADÍSTICAS -->
     <div class="stats-container">
         <div class="stat-card">
             <div class="stat-numero">{{ total_propiedades }}</div>
@@ -42,15 +47,67 @@
         </div>
     </div>
 
-    {% if session.get('usuario') %}
-    <div style="text-align:center; margin: 20px 0 40px;">
-        <p style="color:#60a5fa; font-size:16px;">Bienvenido de nuevo, <strong>{{ session.get('nombre') }}</strong> 👋</p>
+    <!-- CÓMO FUNCIONA -->
+    <div class="seccion">
+        <div class="seccion-header">
+            <h2 class="seccion-titulo">¿Cómo funciona?</h2>
+            <p class="seccion-sub">Tres pasos simples para encontrar o publicar tu propiedad</p>
+        </div>
+        <div class="pasos-grid">
+            <div class="paso-card">
+                <div class="paso-icono">🔍</div>
+                <div class="paso-numero">01</div>
+                <h3 class="paso-titulo">Buscá</h3>
+                <p class="paso-desc">Explorá nuestro catálogo de propiedades filtrando por ciudad, tipo, precio y operación.</p>
+            </div>
+            <div class="paso-card">
+                <div class="paso-icono">📞</div>
+                <div class="paso-numero">02</div>
+                <h3 class="paso-titulo">Contactá</h3>
+                <p class="paso-desc">Enviá una consulta directamente al asesor o contactalo por WhatsApp desde la ficha.</p>
+            </div>
+            <div class="paso-card">
+                <div class="paso-icono">🗓️</div>
+                <div class="paso-numero">03</div>
+                <h3 class="paso-titulo">Visitá</h3>
+                <p class="paso-desc">Coordiná una visita con el asesor y conocé la propiedad en persona antes de decidir.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- PROPIEDADES DESTACADAS -->
+    {% if destacadas %}
+    <div class="seccion seccion-oscura">
+        <div class="seccion-header">
+            <h2 class="seccion-titulo">Propiedades destacadas</h2>
+            <p class="seccion-sub">Las más vistas por nuestra comunidad</p>
+        </div>
+        <div class="destacadas-grid">
+            {% for prop in destacadas %}
+            <a href="/propiedad/{{ prop.id }}" class="destacada-card">
+                <div class="destacada-img-wrap">
+                    <img src="{{ url_for('static', filename='uploads/' + prop.imagen) }}" alt="{{ prop.nombre }}">
+                    <span class="destacada-badge-op {{ 'badge-venta' if prop.operacion == 'Venta' else 'badge-alquiler' }}">
+                        {{ prop.operacion }}
+                    </span>
+                </div>
+                <div class="destacada-body">
+                    <div class="destacada-tipo">{{ prop.tipo }}</div>
+                    <h3 class="destacada-nombre">{{ prop.nombre }}</h3>
+                    <p class="destacada-ciudad">📍 {{ prop.ciudad }}</p>
+                    <div class="destacada-footer">
+                        <span class="destacada-precio">USD {{ prop.precio }}</span>
+                        <span class="destacada-hab">🛏 {{ prop.habitaciones }} hab.</span>
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        <div style="text-align:center; margin-top:32px;">
+            <a href="/propiedades" class="btn-hero-primary">Ver todas las propiedades →</a>
+        </div>
     </div>
     {% endif %}
 
 </body>
 </html>
-
-
-
-
