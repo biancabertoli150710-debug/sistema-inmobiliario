@@ -46,7 +46,15 @@
     <input type="number" name="habitaciones" id="habitaciones" required><br><br>
 
     <label>Precio (USD)</label><br>
-    <input type="text" name="precio" id="precio" required><br><br>
+    <input type="text" name="precio" id="precio" required>
+    <div style="display:flex; gap:10px; align-items:center; margin-top:6px;">
+        <button type="button" onclick="sugerirPrecio()" class="btn-ia" id="btn-precio">
+            💰 Sugerir precio con IA
+        </button>
+        <span id="precio-status" style="font-size:13px; color:#64748b;"></span>
+    </div>
+    <div id="precio-sugerencia" style="display:none; margin-top:8px; padding:10px 14px; background:#1e293b; border:1px solid #334155; border-radius:8px; font-size:14px; color:#e2e8f0;"></div>
+    <br><br>
 
     <label>Descripción</label><br>
     <div style="display:flex; gap:10px; align-items:center; margin-bottom:8px;">
@@ -90,6 +98,51 @@
         document.getElementById('coordenadas').textContent = '📍 Ubicación seleccionada: ' + lat + ', ' + lng;
         document.getElementById('coordenadas').style.color = '#86efac';
     });
+
+    async function sugerirPrecio() {
+        const ciudad = document.getElementById('ciudad').value;
+        const tipo = document.getElementById('tipo').value;
+        const operacion = document.getElementById('operacion').value;
+        const habitaciones = document.getElementById('habitaciones').value;
+
+        if (!ciudad || !tipo || !operacion) {
+            alert('Completa ciudad, tipo y operación antes de sugerir el precio.');
+            return;
+        }
+
+        const btn = document.getElementById('btn-precio');
+        const status = document.getElementById('precio-status');
+        const caja = document.getElementById('precio-sugerencia');
+        btn.disabled = true;
+        btn.textContent = '⏳ Analizando...';
+        status.textContent = 'La IA está estimando el precio...';
+        caja.style.display = 'none';
+
+        try {
+            const response = await fetch('/sugerir-precio', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ciudad, tipo, operacion, habitaciones })
+            });
+
+            const data = await response.json();
+            if (data.sugerencia) {
+                caja.textContent = data.sugerencia;
+                caja.style.display = 'block';
+                status.textContent = '✅ Precio estimado';
+                status.style.color = '#86efac';
+            } else {
+                status.textContent = '❌ Error al estimar el precio';
+                status.style.color = '#fca5a5';
+            }
+        } catch (error) {
+            status.textContent = '❌ Error al estimar el precio';
+            status.style.color = '#fca5a5';
+        }
+
+        btn.disabled = false;
+        btn.textContent = '💰 Sugerir precio con IA';
+    }
 
     async function generarDescripcion() {
         const nombre = document.getElementById('nombre').value;

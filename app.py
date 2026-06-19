@@ -629,6 +629,56 @@ Datos de la propiedad:
             return {'error': str(e)}, 500
     return {'error': 'Demasiadas solicitudes, intenta de nuevo en unos segundos.'}, 429
 
+@app.route('/sugerir-precio', methods=['POST'])
+def sugerir_precio():
+    if not usuario_logueado() or not es_asesor():
+        return {'error': 'No autorizado'}, 401
+
+    datos = request.get_json()
+    ciudad = datos.get('ciudad', '')
+    tipo = datos.get('tipo', '')
+    operacion = datos.get('operacion', '')
+    habitaciones = datos.get('habitaciones', '')
+
+    prompt = f"""Eres un experto en el mercado inmobiliario de Paraguay. Basándote en los precios actuales del mercado paraguayo, sugiere un rango de precio estimado en USD para la siguiente propiedad. Responde SOLO con el rango en este formato exacto: "USD X.000 - USD Y.000" seguido de una línea de explicación breve (máximo 20 palabras). Sin títulos ni texto adicional.
+
+Propiedad:
+- Ciudad: {ciudad}
+- Tipo: {tipo}
+- Operación: {operacion}
+- Habitaciones: {habitaciones or 'No especificado'}"""
+
+    payload = json.dumps({
+        "model": "google/gemma-4-26b-a4b-it:free",
+        "messages": [{"role": "user", "content": prompt}],
+        "max_tokens": 100
+    }).encode('utf-8')
+
+    import time
+    for intento in range(4):
+        try:
+            req = urllib.request.Request(
+                'https://openrouter.ai/api/v1/chat/completions',
+                data=payload,
+                headers={
+                    'Content-Type': 'application/json',
+                    'Authorization': f'Bearer {API_KEY}'
+                }
+            )
+            with urllib.request.urlopen(req) as response:
+                resultado = json.loads(response.read())
+                sugerencia = resultado['choices'][0]['message']['content']
+                return {'sugerencia': sugerencia}
+        except urllib.error.HTTPError as e:
+            if e.code == 429 and intento < 3:
+                time.sleep(7)
+            else:
+                return {'error': f'Error HTTP {e.code}'}, 500
+        except Exception as e:
+            return {'error': str(e)}, 500
+    return {'error': 'Demasiadas solicitudes, intenta de nuevo.'}, 429
+
+
 @app.route('/consultar/<int:propiedad_id>', methods=['POST'])
 def consultar(propiedad_id):
     if not usuario_logueado():
