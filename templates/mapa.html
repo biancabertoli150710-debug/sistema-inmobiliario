@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Mapa de propiedades</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        #mapa-general {
+            height: calc(100vh - 130px);
+            width: 100%;
+        }
+        .leaflet-popup-content-wrapper {
+            background: #111827;
+            border: 1px solid #1f2937;
+            border-radius: 10px;
+            color: #e2e8f0;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.6);
+        }
+        .leaflet-popup-tip {
+            background: #111827;
+        }
+        .leaflet-popup-content {
+            margin: 14px 16px;
+            min-width: 180px;
+        }
+        .popup-nombre {
+            font-size: 15px;
+            font-weight: bold;
+            color: #f1f5f9;
+            margin-bottom: 6px;
+        }
+        .popup-fila {
+            font-size: 13px;
+            color: #94a3b8;
+            margin-bottom: 3px;
+        }
+        .popup-precio {
+            font-size: 15px;
+            font-weight: bold;
+            color: #60a5fa;
+            margin: 8px 0;
+        }
+        .popup-link {
+            display: inline-block;
+            margin-top: 8px;
+            padding: 6px 14px;
+            background: #3b82f6;
+            color: white;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        .popup-link:hover {
+            background: #2563eb;
+        }
+        .mapa-header {
+            background: #111827;
+            border-bottom: 1px solid #1f2937;
+            padding: 12px 28px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .mapa-header h1 {
+            font-size: 18px;
+            color: #f1f5f9;
+            margin: 0;
+            text-align: left;
+        }
+        .mapa-contador {
+            font-size: 13px;
+            color: #64748b;
+            margin: 0;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+
+    {% include 'navbar.html' %}
+
+    <div class="mapa-header">
+        <div>
+            <h1>🗺️ Mapa de propiedades</h1>
+            <p class="mapa-contador">
+                {% if propiedades %}
+                    {{ propiedades|length }} propiedad{{ 'es' if propiedades|length != 1 }} con ubicación registrada
+                {% else %}
+                    Ninguna propiedad tiene ubicación registrada aún
+                {% endif %}
+            </p>
+        </div>
+    </div>
+
+    <div id="mapa-general"></div>
+
+<script>
+    var propiedades = {{ propiedades | tojson }};
+
+    var centro = propiedades.length > 0
+        ? [propiedades[0].latitud, propiedades[0].longitud]
+        : [-23.4425, -58.4438];
+
+    var mapa = L.map('mapa-general').setView(centro, propiedades.length > 1 ? 7 : 13);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap'
+    }).addTo(mapa);
+
+    var iconoAzul = L.divIcon({
+        className: '',
+        html: '<div style="width:14px;height:14px;background:#3b82f6;border:2px solid #fff;border-radius:50%;box-shadow:0 2px 6px rgba(0,0,0,0.5);"></div>',
+        iconSize: [14, 14],
+        iconAnchor: [7, 7],
+        popupAnchor: [0, -10]
+    });
+
+    var bounds = [];
+
+    propiedades.forEach(function(p) {
+        var marker = L.marker([p.latitud, p.longitud], { icon: iconoAzul }).addTo(mapa);
+        var badgeColor = p.operacion === 'Venta'
+            ? 'background:#1e3a5f;color:#60a5fa;border:1px solid #2563eb;'
+            : 'background:#052e16;color:#86efac;border:1px solid #16a34a;';
+        marker.bindPopup(
+            '<div class="popup-nombre">' + p.nombre + '</div>' +
+            '<div class="popup-fila">🏠 ' + p.tipo + ' &nbsp; <span style="padding:2px 8px;border-radius:12px;font-size:11px;font-weight:bold;' + badgeColor + '">' + p.operacion + '</span></div>' +
+            '<div class="popup-precio">USD ' + p.precio + '</div>' +
+            '<a class="popup-link" href="/propiedad/' + p.id + '">Ver detalle →</a>'
+        );
+        bounds.push([p.latitud, p.longitud]);
+    });
+
+    if (bounds.length > 1) {
+        mapa.fitBounds(bounds, { padding: [40, 40] });
+    }
+</script>
+
+</body>
+</html>

@@ -633,6 +633,16 @@ Datos de la propiedad:
             return {'error': str(e)}, 500
     return {'error': 'Demasiadas solicitudes, intenta de nuevo en unos segundos.'}, 429
 
+@app.route('/mapa')
+def mapa():
+    conn = get_db()
+    propiedades = conn.execute(
+        "SELECT id, nombre, tipo, operacion, precio, latitud, longitud FROM propiedades WHERE latitud IS NOT NULL AND longitud IS NOT NULL"
+    ).fetchall()
+    conn.close()
+    return render_template("mapa.html", propiedades=propiedades)
+
+
 @app.route('/sugerir-precio', methods=['POST'])
 def sugerir_precio():
     if not usuario_logueado() or not es_asesor():
