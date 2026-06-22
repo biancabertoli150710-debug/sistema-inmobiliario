@@ -424,7 +424,7 @@ def favoritos():
         (usuario['id'],)
     ).fetchall()
     conn.close()
-    return render_template("favoritos.html", propiedades=props)
+    return render_template("favoritos.html", favoritos=props)
 
 
 @app.route('/perfil')
