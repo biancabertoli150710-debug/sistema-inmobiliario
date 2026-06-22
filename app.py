@@ -633,6 +633,11 @@ Datos de la propiedad:
             return {'error': str(e)}, 500
     return {'error': 'Demasiadas solicitudes, intenta de nuevo en unos segundos.'}, 429
 
+@app.route('/acerca-de')
+def acerca_de():
+    return render_template("acerca_de.html")
+
+
 @app.route('/mapa')
 def mapa():
     conn = get_db()

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    {% include 'head_meta.html' %}
+    <title>Acerca de - InmoSystem</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
+</head>
+<body>
+
+    {% include 'navbar.html' %}
+
+    <div class="container" style="max-width:780px;">
+
+        <div style="text-align:center; margin-bottom:48px;">
+            <img src="{{ url_for('static', filename='img/logo.png') }}" alt="InmoSystem Logo"
+                 style="height:80px; width:80px; object-fit:contain; border-radius:14px; margin-bottom:20px;">
+            <h1 style="font-size:32px; margin-bottom:8px;">InmoSystem</h1>
+            <p style="font-size:16px; color:#64748b; max-width:500px; margin:0 auto;">
+                La plataforma inmobiliaria digital diseñada para Paraguay.
+            </p>
+        </div>
+
+        <div class="detalle-card" style="margin-bottom:24px;">
+            <h2 style="color:#60a5fa; font-size:18px; margin-bottom:12px;">🏢 Quiénes somos</h2>
+            <p style="color:#94a3b8; line-height:1.8; text-align:left;">
+                InmoSystem es una plataforma inmobiliaria moderna que conecta compradores, inquilinos y asesores
+                en Paraguay. Nuestro objetivo es simplificar el proceso de búsqueda, publicación y gestión
+                de propiedades, brindando herramientas profesionales accesibles para todos.
+            </p>
+        </div>
+
+        <div class="detalle-card" style="margin-bottom:24px;">
+            <h2 style="color:#60a5fa; font-size:18px; margin-bottom:16px;">✨ Lo que ofrecemos</h2>
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px,1fr)); gap:16px;">
+                <div style="background:#0f172a; border-radius:10px; padding:16px;">
+                    <div style="font-size:24px; margin-bottom:8px;">🔍</div>
+                    <div style="color:#f1f5f9; font-weight:bold; margin-bottom:4px;">Búsqueda avanzada</div>
+                    <div style="color:#64748b; font-size:13px;">Filtrá por ciudad, tipo, precio y operación.</div>
+                </div>
+                <div style="background:#0f172a; border-radius:10px; padding:16px;">
+                    <div style="font-size:24px; margin-bottom:8px;">🗺️</div>
+                    <div style="color:#f1f5f9; font-weight:bold; margin-bottom:4px;">Mapa interactivo</div>
+                    <div style="color:#64748b; font-size:13px;">Visualizá todas las propiedades en el mapa.</div>
+                </div>
+                <div style="background:#0f172a; border-radius:10px; padding:16px;">
+                    <div style="font-size:24px; margin-bottom:8px;">🤖</div>
+                    <div style="color:#f1f5f9; font-weight:bold; margin-bottom:4px;">IA integrada</div>
+                    <div style="color:#64748b; font-size:13px;">Generá descripciones y precios sugeridos con IA.</div>
+                </div>
+                <div style="background:#0f172a; border-radius:10px; padding:16px;">
+                    <div style="font-size:24px; margin-bottom:8px;">📊</div>
+                    <div style="color:#f1f5f9; font-weight:bold; margin-bottom:4px;">Panel de asesores</div>
+                    <div style="color:#64748b; font-size:13px;">Gestioná clientes, visitas y estadísticas.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="detalle-card" style="margin-bottom:24px;">
+            <h2 style="color:#60a5fa; font-size:18px; margin-bottom:12px;">📍 Contacto</h2>
+            <p style="color:#94a3b8; line-height:1.8; text-align:left; margin:0;">
+                Paraguay · Disponible en todo el país<br>
+                Email: <a href="mailto:contacto@inmosystem.com" style="color:#60a5fa;">contacto@inmosystem.com</a>
+            </p>
+        </div>
+
+        <div style="text-align:center; margin-top:40px;">
+            <a href="/propiedades" class="btn-hero-primary">Ver propiedades →</a>
+        </div>
+
+    </div>
+
+</body>
+</html>

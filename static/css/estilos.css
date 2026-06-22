@@ -34,6 +34,23 @@ body{
     font-weight: bold;
 }
 
+.navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    color: #f8fafc !important;
+    font-size: 17px;
+    font-weight: bold;
+}
+
+.navbar-logo {
+    height: 32px;
+    width: 32px;
+    object-fit: contain;
+    border-radius: 6px;
+}
+
 .navbar a:hover{
     color: #60a5fa;
 }
