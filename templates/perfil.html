@@ -117,18 +117,20 @@
                     </div>
                     <h3>{{ prop.nombre }} - {{ prop.ciudad }}</h3>
                     <p>💵 {{ prop.precio }}</p>
+                    {% if session.get('rol') == 'asesor' %}
                     <div style="display:flex; gap:8px; margin-top:10px;">
                         <a href="/editar/{{ prop.id }}" class="btn-editar">✏️ Editar</a>
                         <form method="POST" action="/eliminar/{{ prop.id }}" onsubmit="return confirmarEliminar()">
                             <button type="submit" class="btn btn-danger">🗑 Eliminar</button>
                         </form>
                     </div>
+                {% endif %}
                 </div>
             </div>
             {% endfor %}
         </div>
         {% else %}
-        <p style="color:#64748b;">No tienes propiedades publicadas aún. <a href="/agregar" style="color:#60a5fa;">Agregar una</a></p>
+        <p style="color:#64748b;">No tienes propiedades publicadas aún.{% if session.get('rol') == 'asesor' %} <a href="/agregar" style="color:#60a5fa;">Agregar una</a>{% endif %}</p>
         {% endif %}
 
     </div>

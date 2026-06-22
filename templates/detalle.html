@@ -156,34 +156,53 @@
             {% endif %}
 
         </div>
-    </div>
 
-    <!-- CONSULTAS -->
-            {% if session.get('rol') == 'cliente' %}
-            <div style="margin-top:28px;">
-                <span class="detalle-label">Enviar consulta al asesor</span>
-                <form method="POST" action="/consultar/{{ prop.id }}" style="margin-top:12px;">
-                    <textarea name="pregunta" rows="3" placeholder="Escribe tu pregunta sobre esta propiedad..." required></textarea>
-                    <button type="submit" style="margin-top:8px;">Enviar consulta</button>
-                </form>
+        {% if session.get('rol') == 'cliente' %}
+        <div style="margin-top:28px; background:#0f172a; border-radius:10px; padding:20px; border:1px solid #1f2937;">
+            <span class="detalle-label">💬 Enviar consulta al asesor</span>
+            <form method="POST" action="/consultar/{{ prop.id }}" style="margin-top:12px;">
+                <textarea name="pregunta" rows="3" placeholder="Escribe tu pregunta sobre esta propiedad..." required></textarea>
+                <button type="submit" style="margin-top:8px;">Enviar consulta</button>
+            </form>
 
-                {% if consultas %}
-                <div style="margin-top:20px;">
-                    <span class="detalle-label">Tus consultas anteriores</span>
-                    {% for c in consultas %}
-                    <div style="background:#0f172a; border-radius:8px; padding:14px; margin-top:10px;">
-                        <p style="color:#e2e8f0; text-align:left; margin-bottom:8px;">❓ {{ c.pregunta }}</p>
-                        {% if c.respuesta %}
-                        <p style="color:#86efac; text-align:left; background:#052e16; padding:10px; border-radius:6px;">✅ {{ c.respuesta }}</p>
-                        {% else %}
-                        <p style="color:#64748b; font-size:13px; text-align:left;">⏳ Esperando respuesta del asesor...</p>
-                        {% endif %}
-                    </div>
-                    {% endfor %}
+            {% set consultas_normales = consultas | selectattr('pregunta', 'defined') | rejectattr('pregunta', 'match', '^\[SOLICITUD DE VISITA\]') | list %}
+            {% set solicitudes = consultas | selectattr('pregunta', 'match', '^\[SOLICITUD DE VISITA\]') | list %}
+
+            {% if consultas_normales %}
+            <div style="margin-top:20px;">
+                <span class="detalle-label">Tus consultas anteriores</span>
+                {% for c in consultas_normales %}
+                <div style="background:#111827; border-radius:8px; padding:14px; margin-top:10px;">
+                    <p style="color:#e2e8f0; text-align:left; margin-bottom:8px;">❓ {{ c.pregunta }}</p>
+                    {% if c.respuesta %}
+                    <p style="color:#86efac; text-align:left; background:#052e16; padding:10px; border-radius:6px;">✅ {{ c.respuesta }}</p>
+                    {% else %}
+                    <p style="color:#64748b; font-size:13px; text-align:left;">⏳ Esperando respuesta del asesor...</p>
+                    {% endif %}
                 </div>
-                {% endif %}
+                {% endfor %}
             </div>
             {% endif %}
+
+            {% if solicitudes %}
+            <div style="margin-top:20px;">
+                <span class="detalle-label">Tus solicitudes de visita</span>
+                {% for s in solicitudes %}
+                <div style="background:#111827; border-radius:8px; padding:14px; margin-top:10px;">
+                    <p style="color:#e2e8f0; text-align:left; margin-bottom:8px;">📅 {{ s.pregunta | replace('[SOLICITUD DE VISITA] ', '') }}</p>
+                    {% if s.respuesta %}
+                    <p style="color:#86efac; text-align:left; background:#052e16; padding:10px; border-radius:6px;">✅ {{ s.respuesta }}</p>
+                    {% else %}
+                    <p style="color:#64748b; font-size:13px; text-align:left;">⏳ El asesor confirmará la visita pronto...</p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+
+    </div>
 
     {% if prop.latitud and prop.longitud %}
     <script>

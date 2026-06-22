@@ -3,6 +3,8 @@ import os
 import sqlite3
 import urllib.request
 import json
+import time
+from datetime import datetime
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
 from dotenv import load_dotenv
@@ -10,7 +12,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = Flask(__name__)
-app.secret_key = 'clave_secreta_inmobiliaria_2024'
+app.secret_key = os.getenv('SECRET_KEY', 'estate_system_fallback_key_2024')
 
 UPLOAD_FOLDER = 'static/uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -247,20 +249,12 @@ def ver_propiedades():
 
     conn = get_db()
     propiedades = conn.execute(sql, params).fetchall()
-
-    favoritos_ids = []
-    if usuario_logueado():
-        usuario = conn.execute("SELECT id FROM usuarios WHERE email = ?", (session['usuario'],)).fetchone()
-        favs = conn.execute("SELECT propiedad_id FROM favoritos WHERE usuario_id = ?", (usuario['id'],)).fetchall()
-        favoritos_ids = [f['propiedad_id'] for f in favs]
-
     conn.close()
-    return render_template("propiedades.html", propiedades=propiedades, favoritos_ids=favoritos_ids)
+    return render_template("propiedades.html", propiedades=propiedades)
 
 
 @app.route('/propiedad/<int:id>')
 def detalle(id):
-    from datetime import datetime
     conn = get_db()
     prop = conn.execute("SELECT * FROM propiedades WHERE id = ?", (id,)).fetchone()
     vendedor = None
@@ -293,7 +287,7 @@ def detalle(id):
             if not reciente:
                 conn.execute(
                     "INSERT INTO historial_vistas (usuario_id, propiedad_id, fecha) VALUES (?, ?, ?)",
-                    (usuario['id'], id, datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+                    (usuario['id'], id, datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S'))
                 )
                 conn.commit()
         prop = conn.execute("SELECT * FROM propiedades WHERE id = ?", (id,)).fetchone()
@@ -429,8 +423,13 @@ def eliminar_imagen(id):
         return redirect('/propiedades')
 
     conn = get_db()
-    imagen = conn.execute("SELECT * FROM imagenes WHERE id = ?", (id,)).fetchone()
+    imagen = conn.execute("SELECT i.*, p.usuario_id FROM imagenes i JOIN propiedades p ON i.propiedad_id = p.id WHERE i.id = ?", (id,)).fetchone()
     if imagen:
+        usuario = conn.execute("SELECT id FROM usuarios WHERE email = ?", (session['usuario'],)).fetchone()
+        if imagen['usuario_id'] != usuario['id']:
+            flash('No tienes permiso para eliminar esta imagen.', 'error')
+            conn.close()
+            return redirect('/propiedades')
         propiedad_id = imagen['propiedad_id']
         conn.execute("DELETE FROM imagenes WHERE id = ?", (id,))
         conn.commit()
@@ -453,6 +452,10 @@ def eliminar(id):
 
     if prop and prop['usuario_id'] == usuario['id']:
         conn.execute("DELETE FROM imagenes WHERE propiedad_id = ?", (id,))
+        conn.execute("DELETE FROM favoritos WHERE propiedad_id = ?", (id,))
+        conn.execute("DELETE FROM consultas WHERE propiedad_id = ?", (id,))
+        conn.execute("DELETE FROM notas_propiedad WHERE propiedad_id = ?", (id,))
+        conn.execute("DELETE FROM historial_vistas WHERE propiedad_id = ?", (id,))
         conn.execute("DELETE FROM propiedades WHERE id = ?", (id,))
         conn.commit()
         flash('Propiedad eliminada.', 'success')
@@ -657,6 +660,11 @@ def cambiar_estado_visita(id, estado):
     if not usuario_logueado() or not es_asesor():
         return redirect('/')
 
+    estados_validos = ['Pendiente', 'Confirmada', 'Realizada', 'Cancelada']
+    if estado not in estados_validos:
+        flash('Estado no válido.', 'error')
+        return redirect('/visitas')
+
     conn = get_db()
     conn.execute("UPDATE visitas SET estado = ? WHERE id = ?", (estado, id))
     conn.commit()
@@ -690,7 +698,6 @@ def calculadora():
 
 @app.route('/generar-descripcion', methods=['POST'])
 def generar_descripcion():
-    print('>>> FUNCIÓN LLAMADA')
     if not usuario_logueado() or not es_asesor():
         return {'error': 'No autorizado'}, 401
 
@@ -729,7 +736,6 @@ Datos de la propiedad:
         }
     )
 
-    import time
     for intento in range(4):
         try:
             with urllib.request.urlopen(req) as response:
@@ -748,10 +754,8 @@ Datos de la propiedad:
                     }
                 )
             else:
-                print(f'ERROR HTTP {e.code}: {e.read().decode()}')
                 return {'error': f'Error HTTP {e.code}'}, 500
         except Exception as e:
-            print(f'ERROR: {e}')
             return {'error': str(e)}, 500
     return {'error': 'Demasiadas solicitudes, intenta de nuevo en unos segundos.'}, 429
 
@@ -796,7 +800,6 @@ Propiedad:
         "max_tokens": 100
     }).encode('utf-8')
 
-    import time
     for intento in range(4):
         try:
             req = urllib.request.Request(
@@ -832,12 +835,11 @@ def consultar(propiedad_id):
         flash('Escribe tu pregunta antes de enviar.', 'error')
         return redirect(f'/propiedad/{propiedad_id}')
 
-    from datetime import datetime
     conn = get_db()
     usuario = conn.execute("SELECT id FROM usuarios WHERE email = ?", (session['usuario'],)).fetchone()
     conn.execute(
         "INSERT INTO consultas (propiedad_id, cliente_id, pregunta, fecha) VALUES (?, ?, ?, ?)",
-        (propiedad_id, usuario['id'], pregunta, datetime.now().strftime('%d/%m/%Y %H:%M'))
+        (propiedad_id, usuario['id'], pregunta, datetime.utcnow().strftime('%d/%m/%Y %H:%M'))
     )
     conn.commit()
     conn.close()
@@ -919,7 +921,6 @@ def eliminar_alerta(id):
 def guardar_nota(propiedad_id):
     if not usuario_logueado() or not es_cliente():
         return redirect('/')
-    from datetime import datetime
     nota = request.form.get('nota', '').strip()
     conn = get_db()
     usuario = conn.execute("SELECT id FROM usuarios WHERE email = ?", (session['usuario'],)).fetchone()
@@ -930,13 +931,13 @@ def guardar_nota(propiedad_id):
     if existente:
         if nota:
             conn.execute("UPDATE notas_propiedad SET nota = ?, fecha = ? WHERE id = ?",
-                         (nota, datetime.now().strftime('%d/%m/%Y %H:%M'), existente['id']))
+                         (nota, datetime.utcnow().strftime('%d/%m/%Y %H:%M'), existente['id']))
         else:
             conn.execute("DELETE FROM notas_propiedad WHERE id = ?", (existente['id'],))
     elif nota:
         conn.execute(
             "INSERT INTO notas_propiedad (usuario_id, propiedad_id, nota, fecha) VALUES (?,?,?,?)",
-            (usuario['id'], propiedad_id, nota, datetime.now().strftime('%d/%m/%Y %H:%M'))
+            (usuario['id'], propiedad_id, nota, datetime.utcnow().strftime('%d/%m/%Y %H:%M'))
         )
     conn.commit()
     conn.close()
@@ -986,7 +987,6 @@ def solicitar_visita(propiedad_id):
     if not usuario_logueado() or not es_cliente():
         flash('Debes iniciar sesión como cliente.', 'warning')
         return redirect('/login')
-    from datetime import datetime
     mensaje = request.form.get('mensaje', '').strip()
     fecha_preferida = request.form.get('fecha_preferida', '').strip()
     texto = f"[SOLICITUD DE VISITA] Fecha preferida: {fecha_preferida or 'A coordinar'}. {mensaje}"
@@ -994,7 +994,7 @@ def solicitar_visita(propiedad_id):
     usuario = conn.execute("SELECT id FROM usuarios WHERE email = ?", (session['usuario'],)).fetchone()
     conn.execute(
         "INSERT INTO consultas (propiedad_id, cliente_id, pregunta, fecha) VALUES (?,?,?,?)",
-        (propiedad_id, usuario['id'], texto, datetime.now().strftime('%d/%m/%Y %H:%M'))
+        (propiedad_id, usuario['id'], texto, datetime.utcnow().strftime('%d/%m/%Y %H:%M'))
     )
     conn.commit()
     conn.close()
