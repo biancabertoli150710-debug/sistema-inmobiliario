@@ -12,9 +12,10 @@
 
     <!-- HERO -->
     <div class="hero hero-landing">
-        <div class="hero-badge">🏠 Plataforma Inmobiliaria</div>
-        <h1 class="hero-titulo">Encontrá tu propiedad<br><span class="hero-titulo-azul">ideal en Paraguay</span></h1>
-        <p class="hero-sub">Comprá, alquilá o publicá propiedades de forma rápida, segura y profesional.</p>
+        <img src="{{ url_for('static', filename='img/logo.png') }}" alt="EstateSystem Logo" class="hero-logo">
+        <h1 class="hero-titulo">EstateSystem</h1>
+        <p class="hero-marca-sub">La plataforma inmobiliaria digital de Paraguay</p>
+        <p class="hero-sub">Encontrá, publicá y gestioná propiedades de forma rápida, segura y profesional. Conectamos compradores, inquilinos y asesores en un solo lugar.</p>
         <div class="hero-botones">
             <a href="/propiedades" class="btn-hero-primary">🔍 Ver propiedades</a>
             {% if session.get('usuario') %}
