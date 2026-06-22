@@ -37,6 +37,15 @@
         <a href="/propiedades" style="padding:10px 16px; background:#1f2937; color:#94a3b8; border-radius:6px; text-decoration:none; font-size:14px;">Limpiar</a>
     </form>
 
+    <!-- BARRA COMPARADOR -->
+    <div id="barra-comparar" style="display:none; position:fixed; bottom:0; left:0; right:0; background:#1e3a5f; border-top:2px solid #3b82f6; padding:14px 24px; z-index:999; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+        <span style="color:#f1f5f9; font-size:14px;">⚖️ <strong id="comparar-count">0</strong> propiedad(es) seleccionada(s)</span>
+        <div style="display:flex; gap:10px;">
+            <button onclick="limpiarComparar()" style="background:transparent; color:#94a3b8; border:1px solid #334155; padding:8px 16px; border-radius:6px; cursor:pointer; font-size:13px;">Limpiar</button>
+            <button onclick="irAComparar()" style="background:#3b82f6; color:white; border:none; padding:8px 20px; border-radius:6px; cursor:pointer; font-size:14px; font-weight:bold;">Comparar →</button>
+        </div>
+    </div>
+
     <div class="grid">
         <h1>Lista de Propiedades</h1>
 
@@ -70,14 +79,18 @@
                 <p style="font-size:13px; color:#64748b; margin-top:4px;">👁 {{ prop.vistas or 0 }} vistas</p>
                 <p style="margin-top:8px; font-size:14px; color:#94a3b8;">{{ prop.descripcion[:100] }}{% if prop.descripcion|length > 100 %}...{% endif %}</p>
 
-                {% if session.get('usuario') %}
-                <div style="display:flex; gap:8px; margin-top:10px;">
+                <div style="display:flex; gap:8px; margin-top:10px; align-items:center; flex-wrap:wrap;">
+                    {% if session.get('rol') == 'asesor' %}
                     <a href="/editar/{{ prop.id }}" class="btn-editar">✏️ Editar</a>
                     <form method="POST" action="/eliminar/{{ prop.id }}" onsubmit="return confirmarEliminar()">
                         <button type="submit" class="btn btn-danger">🗑 Eliminar</button>
                     </form>
+                    {% endif %}
+                    <label style="display:flex; align-items:center; gap:6px; color:#94a3b8; font-size:13px; cursor:pointer; margin-left:auto;">
+                        <input type="checkbox" class="chk-comparar" value="{{ prop.id }}" onchange="actualizarComparar(this)" style="accent-color:#3b82f6; width:15px; height:15px;">
+                        Comparar
+                    </label>
                 </div>
-                {% endif %}
             </div>
 
         </div>
@@ -91,6 +104,23 @@
     <script>
     function confirmarEliminar() {
         return confirm('¿Estás seguro de que quieres eliminar esta propiedad?');
+    }
+
+    function actualizarComparar(el) {
+        var checks = document.querySelectorAll('.chk-comparar:checked');
+        if (checks.length > 3) { el.checked = false; checks = document.querySelectorAll('.chk-comparar:checked'); }
+        document.getElementById('comparar-count').textContent = checks.length;
+        document.getElementById('barra-comparar').style.display = checks.length >= 2 ? 'flex' : 'none';
+    }
+
+    function limpiarComparar() {
+        document.querySelectorAll('.chk-comparar').forEach(function(c){ c.checked = false; });
+        document.getElementById('barra-comparar').style.display = 'none';
+    }
+
+    function irAComparar() {
+        var ids = Array.from(document.querySelectorAll('.chk-comparar:checked')).map(function(c){ return c.value; });
+        if (ids.length >= 2) window.location.href = '/comparar?ids=' + ids.join(',');
     }
     </script>
 

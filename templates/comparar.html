@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    {% include 'head_meta.html' %}
+    <title>Comparar propiedades</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
+</head>
+<body>
+    {% include 'navbar.html' %}
+    <div class="container" style="max-width:1100px;">
+        <a href="/propiedades" class="btn-volver">← Volver</a>
+        <h1>⚖️ Comparar propiedades</h1>
+
+        {% if propiedades %}
+        <div style="overflow-x:auto; margin-top:24px;">
+            <table style="width:100%; border-collapse:collapse; background:#111827; border-radius:12px; overflow:hidden;">
+                <thead>
+                    <tr style="background:#1e3a5f;">
+                        <th style="padding:14px 18px; text-align:left; color:#94a3b8; font-size:13px; width:160px;">Característica</th>
+                        {% for prop in propiedades %}
+                        <th style="padding:14px 18px; text-align:center; color:#f1f5f9; font-size:14px;">
+                            <a href="/propiedad/{{ prop.id }}" style="color:#60a5fa; text-decoration:none;">{{ prop.nombre }}</a>
+                        </th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="border-top:1px solid #1f2937;">
+                        <td style="padding:14px 18px; color:#64748b; font-size:13px; font-weight:bold;">Imagen</td>
+                        {% for prop in propiedades %}
+                        <td style="padding:14px 18px; text-align:center;">
+                            <img src="{{ url_for('static', filename='uploads/' + prop.imagen) }}"
+                                 style="width:140px; height:100px; object-fit:cover; border-radius:8px;">
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% set filas = [
+                        ('Ciudad', 'ciudad'),
+                        ('Tipo', 'tipo'),
+                        ('Operación', 'operacion'),
+                        ('Precio (USD)', 'precio'),
+                        ('Habitaciones', 'habitaciones'),
+                        ('Dirección', 'direccion'),
+                        ('Estado', 'estado'),
+                    ] %}
+                    {% for label, campo in filas %}
+                    <tr style="border-top:1px solid #1f2937; {% if loop.index % 2 == 0 %}background:#0f172a;{% endif %}">
+                        <td style="padding:14px 18px; color:#64748b; font-size:13px; font-weight:bold;">{{ label }}</td>
+                        {% for prop in propiedades %}
+                        <td style="padding:14px 18px; text-align:center; color:#e2e8f0; font-size:14px;">
+                            {% if campo == 'precio' %}
+                                <span style="color:#60a5fa; font-weight:bold;">USD {{ prop[campo] }}</span>
+                            {% elif campo == 'habitaciones' and prop[campo] == 0 %}
+                                <span style="color:#64748b;">—</span>
+                            {% else %}
+                                {{ prop[campo] }}
+                            {% endif %}
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                    <tr style="border-top:1px solid #1f2937;">
+                        <td style="padding:14px 18px; color:#64748b; font-size:13px; font-weight:bold;">Ver detalle</td>
+                        {% for prop in propiedades %}
+                        <td style="padding:14px 18px; text-align:center;">
+                            <a href="/propiedad/{{ prop.id }}" class="btn-hero-primary" style="font-size:13px; padding:8px 16px;">Ver →</a>
+                        </td>
+                        {% endfor %}
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div style="text-align:center; padding:60px 0;">
+            <p style="font-size:48px;">⚖️</p>
+            <p style="color:#64748b;">No seleccionaste propiedades para comparar.</p>
+            <a href="/propiedades" class="btn-hero-primary" style="display:inline-block; margin-top:16px;">Ir a propiedades</a>
+        </div>
+        {% endif %}
+    </div>
+</body>
+</html>

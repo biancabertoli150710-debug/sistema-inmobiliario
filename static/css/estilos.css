@@ -1219,3 +1219,25 @@ form button:hover{
     background: #2563eb;
     color: white;
 }
+/* ---------------- CALCULADORA CLIENTE ---------------- */
+
+.resultado-card {
+    background: #0f172a;
+    border: 1px solid #1f2937;
+    border-radius: 10px;
+    padding: 20px;
+}
+
+.resultado-fila {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #1f2937;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.resultado-fila:last-child {
+    border-bottom: none;
+}

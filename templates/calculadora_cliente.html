@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    {% include 'head_meta.html' %}
+    <title>Calculadora de Presupuesto - EstateSystem</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
+</head>
+<body>
+    {% include 'navbar.html' %}
+    <div class="container" style="max-width:600px;">
+        <h1>🏦 Calculadora de presupuesto</h1>
+        <p style="color:#64748b; margin-bottom:32px;">Ingresá tu ingreso mensual y te sugerimos cuánto podés destinar a una propiedad.</p>
+
+        <div class="detalle-card">
+            <div class="campo">
+                <label>Ingreso mensual (USD)</label>
+                <input type="number" id="ingreso" placeholder="Ej: 1500" min="0" oninput="calcular()">
+            </div>
+            <div class="campo">
+                <label>Tipo de operación</label>
+                <select id="operacion" onchange="calcular()" style="width:100%; padding:10px; background:#0f172a; border:1px solid #334155; border-radius:6px; color:white;">
+                    <option value="alquiler">Alquiler</option>
+                    <option value="venta">Compra (financiado)</option>
+                </select>
+            </div>
+            <div class="campo">
+                <label>Años de financiamiento <span id="label-anos" style="color:#64748b; font-weight:normal;">(solo para compra)</span></label>
+                <input type="number" id="anos" value="20" min="5" max="30" oninput="calcular()" style="width:100%;">
+            </div>
+
+            <div id="resultado" style="display:none; margin-top:24px;">
+                <div class="resultado-card">
+                    <div class="resultado-fila">
+                        <span style="color:#64748b;">Ingreso mensual</span>
+                        <span id="res-ingreso" style="color:#f1f5f9; font-weight:bold;"></span>
+                    </div>
+                    <div class="resultado-fila">
+                        <span style="color:#64748b;">Cuota máxima recomendada (30%)</span>
+                        <span id="res-cuota" style="color:#60a5fa; font-weight:bold;"></span>
+                    </div>
+                    <div class="resultado-fila" style="border-top:1px solid #1f2937; padding-top:12px; margin-top:4px;">
+                        <span style="color:#f1f5f9; font-weight:bold; font-size:15px;" id="label-rango">Rango de propiedad sugerido</span>
+                        <span id="res-rango" style="color:#86efac; font-weight:bold; font-size:16px;"></span>
+                    </div>
+                </div>
+                <p id="res-consejo" style="color:#64748b; font-size:13px; margin-top:12px; line-height:1.6;"></p>
+                <a href="/propiedades" id="res-link" class="btn-hero-primary" style="display:inline-block; margin-top:16px;">Ver propiedades en ese rango →</a>
+            </div>
+
+            <div id="sin-ingreso" style="text-align:center; padding:32px 0; color:#64748b;">
+                Ingresá tu salario mensual para ver la sugerencia.
+            </div>
+        </div>
+    </div>
+
+<script>
+function fmt(n) {
+    return 'USD ' + Math.round(n).toLocaleString('es-PY');
+}
+
+function calcular() {
+    var ingreso = parseFloat(document.getElementById('ingreso').value);
+    var operacion = document.getElementById('operacion').value;
+    var anos = parseInt(document.getElementById('anos').value) || 20;
+
+    if (!ingreso || ingreso <= 0) {
+        document.getElementById('resultado').style.display = 'none';
+        document.getElementById('sin-ingreso').style.display = 'block';
+        return;
+    }
+
+    document.getElementById('resultado').style.display = 'block';
+    document.getElementById('sin-ingreso').style.display = 'none';
+
+    var cuota = ingreso * 0.30;
+    document.getElementById('res-ingreso').textContent = fmt(ingreso);
+    document.getElementById('res-cuota').textContent = fmt(cuota) + '/mes';
+
+    var min, max, consejo, link;
+
+    if (operacion === 'alquiler') {
+        min = cuota * 0.8;
+        max = cuota;
+        document.getElementById('label-rango').textContent = 'Alquiler mensual sugerido';
+        consejo = 'Se recomienda no destinar más del 30% de tus ingresos al alquiler. Con ' + fmt(ingreso) + ' de ingreso, podés buscar propiedades en alquiler entre ' + fmt(min) + ' y ' + fmt(max) + ' por mes.';
+        link = '/propiedades?operacion=Alquiler';
+    } else {
+        var totalFinanciado = cuota * anos * 12;
+        var entradaMin = totalFinanciado * 0.20;
+        var entradaMax = totalFinanciado * 0.30;
+        min = totalFinanciado + entradaMin;
+        max = totalFinanciado + entradaMax;
+        document.getElementById('label-rango').textContent = 'Precio de propiedad sugerido';
+        consejo = 'Con una cuota mensual de ' + fmt(cuota) + ' a ' + anos + ' años, podés financiar aproximadamente ' + fmt(totalFinanciado) + '. Sumando una entrada del 20-30%, tu rango de compra es ' + fmt(min) + ' - ' + fmt(max) + '.';
+        link = '/propiedades?operacion=Venta';
+    }
+
+    document.getElementById('res-rango').textContent = fmt(min) + ' - ' + fmt(max);
+    document.getElementById('res-consejo').textContent = consejo;
+    document.getElementById('res-link').href = link;
+}
+</script>
+</body>
+</html>

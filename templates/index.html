@@ -111,6 +111,36 @@
     </div>
     {% endif %}
 
+    <!-- RECOMENDACIONES PERSONALIZADAS -->
+    {% if recomendadas %}
+    <div class="seccion seccion-oscura">
+        <div class="seccion-header">
+            <h2 class="seccion-titulo">✨ Recomendadas para vos</h2>
+            <p class="seccion-sub">Basadas en tus propiedades favoritas</p>
+        </div>
+        <div class="destacadas-grid">
+            {% for prop in recomendadas %}
+            <a href="/propiedad/{{ prop.id }}" class="destacada-card">
+                <img src="{{ url_for('static', filename='uploads/' + prop.imagen) }}" alt="{{ prop.nombre }}" class="destacada-img">
+                <div class="destacada-info">
+                    <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px;">
+                        <span class="badge badge-tipo">{{ prop.tipo }}</span>
+                        {% if prop.operacion == 'Venta' %}
+                            <span class="badge badge-venta">Venta</span>
+                        {% else %}
+                            <span class="badge badge-alquiler">Alquiler</span>
+                        {% endif %}
+                    </div>
+                    <h3 class="destacada-nombre">{{ prop.nombre }}</h3>
+                    <p class="destacada-ciudad">📍 {{ prop.ciudad }}</p>
+                    <p class="destacada-precio">USD {{ prop.precio }}</p>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
     <!-- ACERCA DE -->
     <div class="seccion">
         <div class="seccion-header">

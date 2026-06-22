@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    {% include 'head_meta.html' %}
+    <title>Perfil del Asesor - EstateSystem</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
+</head>
+<body>
+    {% include 'navbar.html' %}
+    <div class="container" style="max-width:1000px;">
+        <a href="javascript:history.back()" class="btn-volver">← Volver</a>
+
+        <div class="perfil-card" style="margin-bottom:32px;">
+            <div class="perfil-avatar">{{ asesor.nombre[0].upper() }}</div>
+            <div>
+                <h2 style="color:#f8fafc; margin-bottom:4px;">{{ asesor.nombre }}</h2>
+                <p style="color:#64748b; text-align:left; margin:0;">🏠 Asesor inmobiliario</p>
+                {% if asesor.telefono %}
+                <p style="color:#64748b; text-align:left; margin:6px 0 0;">📞 +{{ asesor.telefono }}</p>
+                {% endif %}
+                <p style="color:#60a5fa; text-align:left; margin:6px 0 0; font-size:14px;">
+                    {{ propiedades|length }} propiedad{{ 'es publicadas' if propiedades|length != 1 else ' publicada' }}
+                </p>
+            </div>
+        </div>
+
+        {% if propiedades %}
+        <h2 style="color:#f8fafc; margin-bottom:20px;">Propiedades de {{ asesor.nombre }}</h2>
+        <div class="grid" style="width:100%; margin:0;">
+            {% for prop in propiedades %}
+            <div class="propiedad">
+                <a href="/propiedad/{{ prop.id }}" style="text-decoration:none;">
+                    <img src="{{ url_for('static', filename='uploads/' + prop.imagen) }}"
+                         alt="{{ prop.nombre }}"
+                         style="width:100%; height:200px; object-fit:cover; border-radius:10px;">
+                </a>
+                <div style="padding:12px;">
+                    <div style="display:flex; gap:8px; margin-bottom:8px; flex-wrap:wrap;">
+                        <span class="badge badge-tipo">{{ prop.tipo }}</span>
+                        <span class="badge badge-operacion">{{ prop.operacion }}</span>
+                    </div>
+                    <a href="/propiedad/{{ prop.id }}" style="text-decoration:none;">
+                        <h3 style="color:#f1f5f9;">{{ prop.nombre }}</h3>
+                    </a>
+                    <p>📍 {{ prop.ciudad }}</p>
+                    <p style="color:#60a5fa; font-weight:bold;">USD {{ prop.precio }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p style="color:#64748b; text-align:center; margin-top:40px;">Este asesor no tiene propiedades publicadas.</p>
+        {% endif %}
+    </div>
+</body>
+</html>

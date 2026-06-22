@@ -24,6 +24,80 @@
             </div>
         </div>
 
+        {% if session.get('rol') == 'cliente' %}
+        <!-- ALERTAS DE BÚSQUEDA -->
+        <div style="margin-top:36px;">
+            <h2 style="color:#f8fafc; margin-bottom:16px;">🔔 Mis alertas de búsqueda</h2>
+            <div style="background:#111827; border-radius:12px; padding:20px; border:1px solid #1f2937; margin-bottom:16px;">
+                <form method="POST" action="/alerta" style="display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end;">
+                    <div style="flex:1; min-width:130px;">
+                        <label style="font-size:13px; color:#94a3b8; display:block; margin-bottom:4px;">Ciudad</label>
+                        <input type="text" name="ciudad" placeholder="Ej: Asunción" style="width:100%;">
+                    </div>
+                    <div style="flex:1; min-width:130px;">
+                        <label style="font-size:13px; color:#94a3b8; display:block; margin-bottom:4px;">Tipo</label>
+                        <select name="tipo" style="width:100%; padding:10px; background:#0f172a; border:1px solid #334155; border-radius:6px; color:white;">
+                            <option value="">Cualquiera</option>
+                            <option>Casa</option>
+                            <option>Apartamento</option>
+                            <option>Terreno</option>
+                            <option>Local comercial</option>
+                        </select>
+                    </div>
+                    <div style="flex:1; min-width:130px;">
+                        <label style="font-size:13px; color:#94a3b8; display:block; margin-bottom:4px;">Precio máx (USD)</label>
+                        <input type="number" name="precio_max" placeholder="Ej: 150000" style="width:100%;">
+                    </div>
+                    <button type="submit" style="white-space:nowrap;">+ Guardar alerta</button>
+                </form>
+            </div>
+            {% if alertas %}
+            <div style="display:flex; flex-direction:column; gap:8px;">
+                {% for a in alertas %}
+                <div style="background:#111827; border-radius:8px; padding:14px 18px; border:1px solid #1f2937; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                    <div style="display:flex; gap:16px; flex-wrap:wrap; font-size:14px; color:#e2e8f0;">
+                        {% if a.ciudad %}<span>📍 {{ a.ciudad }}</span>{% endif %}
+                        {% if a.tipo %}<span>🏠 {{ a.tipo }}</span>{% endif %}
+                        {% if a.precio_max %}<span>💵 Máx USD {{ a.precio_max }}</span>{% endif %}
+                    </div>
+                    <form method="POST" action="/alerta/eliminar/{{ a.id }}">
+                        <button type="submit" style="background:transparent; color:#ef4444; border:1px solid #ef4444; padding:4px 12px; border-radius:6px; font-size:12px; cursor:pointer;">Eliminar</button>
+                    </form>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p style="color:#64748b; font-size:14px;">No tenés alertas guardadas.</p>
+            {% endif %}
+        </div>
+
+        {% if historial %}
+        <div style="margin-top:36px;">
+            <h2 style="color:#f8fafc; margin-bottom:16px;">🕐 Últimas propiedades vistas</h2>
+            <div style="display:flex; flex-direction:column; gap:10px;">
+                {% for p in historial %}
+                <a href="/propiedad/{{ p.id }}" style="text-decoration:none;">
+                    <div style="background:#111827; border-radius:10px; padding:14px 18px; border:1px solid #1f2937; display:flex; align-items:center; gap:16px;" onmouseover="this.style.borderColor='#3b82f6'" onmouseout="this.style.borderColor='#1f2937'">
+                        <img src="{{ url_for('static', filename='uploads/' + p.imagen) }}" style="width:64px; height:48px; object-fit:cover; border-radius:6px; flex-shrink:0;">
+                        <div style="flex:1;">
+                            <p style="color:#f1f5f9; font-weight:bold; margin:0 0 2px;">{{ p.nombre }}</p>
+                            <p style="color:#64748b; font-size:13px; margin:0;">{{ p.ciudad }} · USD {{ p.precio }}</p>
+                        </div>
+                        <span style="color:#64748b; font-size:12px; white-space:nowrap;">{{ p.fecha_vista }}</span>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <div style="margin-top:28px;">
+            <a href="/calculadora-cliente" style="display:inline-flex; align-items:center; gap:8px; background:#111827; border:1px solid #1f2937; border-radius:10px; padding:14px 20px; text-decoration:none; color:#f1f5f9; font-size:14px;" onmouseover="this.style.borderColor='#3b82f6'" onmouseout="this.style.borderColor='#1f2937'">
+                🏦 <span><strong>Calculadora de presupuesto</strong><br><span style="color:#64748b; font-size:12px;">Calculá cuánto podés invertir según tu ingreso</span></span>
+            </a>
+        </div>
+        {% endif %}
+
         <!-- PROPIEDADES DEL USUARIO -->
         <h2 style="color:#f8fafc; margin-top:40px; margin-bottom:20px;">Mis propiedades ({{ propiedades|length }})</h2>
 

@@ -123,6 +123,40 @@ def init_db():
         )
     ''')
 
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS alertas_busqueda (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            usuario_id INTEGER NOT NULL,
+            ciudad TEXT,
+            tipo TEXT,
+            precio_max TEXT,
+            FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+        )
+    ''')
+
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS notas_propiedad (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            usuario_id INTEGER NOT NULL,
+            propiedad_id INTEGER NOT NULL,
+            nota TEXT NOT NULL,
+            fecha TEXT NOT NULL,
+            FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
+            FOREIGN KEY (propiedad_id) REFERENCES propiedades(id)
+        )
+    ''')
+
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS historial_vistas (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            usuario_id INTEGER NOT NULL,
+            propiedad_id INTEGER NOT NULL,
+            fecha TEXT NOT NULL,
+            FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
+            FOREIGN KEY (propiedad_id) REFERENCES propiedades(id)
+        )
+    ''')
+
     os.makedirs(UPLOAD_FOLDER, exist_ok=True)
     conn.commit()
     conn.close()
@@ -152,13 +186,35 @@ def inicio():
     destacadas = conn.execute(
         "SELECT * FROM propiedades ORDER BY vistas DESC, id DESC LIMIT 3"
     ).fetchall()
+    recomendadas = []
+    if usuario_logueado() and es_cliente():
+        usuario = conn.execute("SELECT id FROM usuarios WHERE email = ?", (session['usuario'],)).fetchone()
+        favs = conn.execute(
+            "SELECT p.tipo, p.ciudad FROM propiedades p JOIN favoritos f ON p.id = f.propiedad_id WHERE f.usuario_id = ?",
+            (usuario['id'],)
+        ).fetchall()
+        if favs:
+            tipos = list({f['tipo'] for f in favs})
+            ciudades = list({f['ciudad'] for f in favs})
+            fav_ids = conn.execute(
+                "SELECT propiedad_id FROM favoritos WHERE usuario_id = ?", (usuario['id'],)
+            ).fetchall()
+            fav_id_list = [f['propiedad_id'] for f in fav_ids]
+            placeholders_t = ','.join('?' * len(tipos))
+            placeholders_c = ','.join('?' * len(ciudades))
+            excluir = ','.join('?' * len(fav_id_list)) if fav_id_list else '0'
+            recomendadas = conn.execute(
+                f"SELECT * FROM propiedades WHERE (tipo IN ({placeholders_t}) OR ciudad IN ({placeholders_c})) AND id NOT IN ({excluir}) ORDER BY vistas DESC LIMIT 3",
+                tipos + ciudades + fav_id_list
+            ).fetchall()
     conn.close()
     return render_template("index.html",
         total_propiedades=total_propiedades,
         total_usuarios=total_usuarios,
         total_venta=total_venta,
         total_alquiler=total_alquiler,
-        destacadas=destacadas
+        destacadas=destacadas,
+        recomendadas=recomendadas
     )
 
 
@@ -204,16 +260,18 @@ def ver_propiedades():
 
 @app.route('/propiedad/<int:id>')
 def detalle(id):
+    from datetime import datetime
     conn = get_db()
     prop = conn.execute("SELECT * FROM propiedades WHERE id = ?", (id,)).fetchone()
     vendedor = None
     es_favorito = False
     imagenes = []
     consultas = []
+    nota = None
     if prop:
         conn.execute("UPDATE propiedades SET vistas = vistas + 1 WHERE id = ?", (id,))
         conn.commit()
-        vendedor = conn.execute("SELECT nombre, telefono FROM usuarios WHERE id = ?", (prop['usuario_id'],)).fetchone()
+        vendedor = conn.execute("SELECT id, nombre, telefono FROM usuarios WHERE id = ?", (prop['usuario_id'],)).fetchone()
         imagenes = conn.execute("SELECT nombre FROM imagenes WHERE propiedad_id = ?", (id,)).fetchall()
         if usuario_logueado():
             usuario = conn.execute("SELECT id FROM usuarios WHERE email = ?", (session['usuario'],)).fetchone()
@@ -223,12 +281,28 @@ def detalle(id):
                 "SELECT * FROM consultas WHERE propiedad_id = ? AND cliente_id = ? ORDER BY id DESC",
                 (id, usuario['id'])
             ).fetchall()
+            nota = conn.execute(
+                "SELECT nota FROM notas_propiedad WHERE usuario_id = ? AND propiedad_id = ?",
+                (usuario['id'], id)
+            ).fetchone()
+            # Registrar historial (evitar duplicados recientes)
+            reciente = conn.execute(
+                "SELECT id FROM historial_vistas WHERE usuario_id = ? AND propiedad_id = ? AND fecha > datetime('now', '-1 hour')",
+                (usuario['id'], id)
+            ).fetchone()
+            if not reciente:
+                conn.execute(
+                    "INSERT INTO historial_vistas (usuario_id, propiedad_id, fecha) VALUES (?, ?, ?)",
+                    (usuario['id'], id, datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+                )
+                conn.commit()
         prop = conn.execute("SELECT * FROM propiedades WHERE id = ?", (id,)).fetchone()
     conn.close()
     if not prop:
         flash('Propiedad no encontrada.', 'error')
         return redirect('/propiedades')
-    return render_template("detalle.html", prop=prop, vendedor=vendedor, es_favorito=es_favorito, imagenes=imagenes, consultas=consultas)
+    return render_template("detalle.html", prop=prop, vendedor=vendedor, es_favorito=es_favorito,
+                           imagenes=imagenes, consultas=consultas, nota=nota)
 
 
 @app.route('/agregar', methods=['GET', 'POST'])
@@ -440,8 +514,18 @@ def perfil():
         "SELECT p.* FROM propiedades p JOIN favoritos f ON p.id = f.propiedad_id WHERE f.usuario_id = ?",
         (usuario['id'],)
     ).fetchall()
+    alertas = conn.execute(
+        "SELECT * FROM alertas_busqueda WHERE usuario_id = ?", (usuario['id'],)
+    ).fetchall()
+    historial = conn.execute(
+        """SELECT p.*, h.fecha as fecha_vista FROM propiedades p
+           JOIN historial_vistas h ON p.id = h.propiedad_id
+           WHERE h.usuario_id = ? ORDER BY h.fecha DESC LIMIT 5""",
+        (usuario['id'],)
+    ).fetchall()
     conn.close()
-    return render_template("perfil.html", usuario=usuario, propiedades=propiedades, favoritos=favoritos)
+    return render_template("perfil.html", usuario=usuario, propiedades=propiedades,
+                           favoritos=favoritos, alertas=alertas, historial=historial)
 
 
 @app.route('/estadisticas')
@@ -796,6 +880,127 @@ def responder_consulta(id):
         flash('Respuesta enviada exitosamente.', 'success')
 
     return redirect('/consultas')
+
+# ----------------- FUNCIONES CLIENTE -----------------
+
+@app.route('/alerta', methods=['POST'])
+def guardar_alerta():
+    if not usuario_logueado() or not es_cliente():
+        return redirect('/')
+    conn = get_db()
+    usuario = conn.execute("SELECT id FROM usuarios WHERE email = ?", (session['usuario'],)).fetchone()
+    ciudad = request.form.get('ciudad', '').strip()
+    tipo = request.form.get('tipo', '').strip()
+    precio_max = request.form.get('precio_max', '').strip()
+    conn.execute(
+        "INSERT INTO alertas_busqueda (usuario_id, ciudad, tipo, precio_max) VALUES (?,?,?,?)",
+        (usuario['id'], ciudad or None, tipo or None, precio_max or None)
+    )
+    conn.commit()
+    conn.close()
+    flash('Alerta de búsqueda guardada.', 'success')
+    return redirect('/perfil')
+
+
+@app.route('/alerta/eliminar/<int:id>', methods=['POST'])
+def eliminar_alerta(id):
+    if not usuario_logueado() or not es_cliente():
+        return redirect('/')
+    conn = get_db()
+    usuario = conn.execute("SELECT id FROM usuarios WHERE email = ?", (session['usuario'],)).fetchone()
+    conn.execute("DELETE FROM alertas_busqueda WHERE id = ? AND usuario_id = ?", (id, usuario['id']))
+    conn.commit()
+    conn.close()
+    flash('Alerta eliminada.', 'success')
+    return redirect('/perfil')
+
+
+@app.route('/nota/<int:propiedad_id>', methods=['POST'])
+def guardar_nota(propiedad_id):
+    if not usuario_logueado() or not es_cliente():
+        return redirect('/')
+    from datetime import datetime
+    nota = request.form.get('nota', '').strip()
+    conn = get_db()
+    usuario = conn.execute("SELECT id FROM usuarios WHERE email = ?", (session['usuario'],)).fetchone()
+    existente = conn.execute(
+        "SELECT id FROM notas_propiedad WHERE usuario_id = ? AND propiedad_id = ?",
+        (usuario['id'], propiedad_id)
+    ).fetchone()
+    if existente:
+        if nota:
+            conn.execute("UPDATE notas_propiedad SET nota = ?, fecha = ? WHERE id = ?",
+                         (nota, datetime.now().strftime('%d/%m/%Y %H:%M'), existente['id']))
+        else:
+            conn.execute("DELETE FROM notas_propiedad WHERE id = ?", (existente['id'],))
+    elif nota:
+        conn.execute(
+            "INSERT INTO notas_propiedad (usuario_id, propiedad_id, nota, fecha) VALUES (?,?,?,?)",
+            (usuario['id'], propiedad_id, nota, datetime.now().strftime('%d/%m/%Y %H:%M'))
+        )
+    conn.commit()
+    conn.close()
+    flash('Nota guardada.', 'success')
+    return redirect(f'/propiedad/{propiedad_id}')
+
+
+@app.route('/comparar')
+def comparar():
+    ids_raw = request.args.get('ids', '')
+    ids = [int(i) for i in ids_raw.split(',') if i.strip().isdigit()][:3]
+    propiedades = []
+    if ids:
+        conn = get_db()
+        for pid in ids:
+            p = conn.execute("SELECT * FROM propiedades WHERE id = ?", (pid,)).fetchone()
+            if p:
+                propiedades.append(p)
+        conn.close()
+    return render_template("comparar.html", propiedades=propiedades)
+
+
+@app.route('/asesor/<int:id>')
+def perfil_asesor(id):
+    conn = get_db()
+    asesor = conn.execute("SELECT id, nombre, telefono FROM usuarios WHERE id = ? AND rol = 'asesor'", (id,)).fetchone()
+    if not asesor:
+        flash('Asesor no encontrado.', 'error')
+        return redirect('/propiedades')
+    propiedades = conn.execute(
+        "SELECT * FROM propiedades WHERE usuario_id = ? ORDER BY id DESC", (id,)
+    ).fetchall()
+    conn.close()
+    return render_template("asesor.html", asesor=asesor, propiedades=propiedades)
+
+
+@app.route('/calculadora-cliente')
+def calculadora_cliente():
+    if not usuario_logueado() or not es_cliente():
+        flash('Esta calculadora es para clientes.', 'warning')
+        return redirect('/')
+    return render_template("calculadora_cliente.html")
+
+
+@app.route('/solicitar-visita/<int:propiedad_id>', methods=['POST'])
+def solicitar_visita(propiedad_id):
+    if not usuario_logueado() or not es_cliente():
+        flash('Debes iniciar sesión como cliente.', 'warning')
+        return redirect('/login')
+    from datetime import datetime
+    mensaje = request.form.get('mensaje', '').strip()
+    fecha_preferida = request.form.get('fecha_preferida', '').strip()
+    texto = f"[SOLICITUD DE VISITA] Fecha preferida: {fecha_preferida or 'A coordinar'}. {mensaje}"
+    conn = get_db()
+    usuario = conn.execute("SELECT id FROM usuarios WHERE email = ?", (session['usuario'],)).fetchone()
+    conn.execute(
+        "INSERT INTO consultas (propiedad_id, cliente_id, pregunta, fecha) VALUES (?,?,?,?)",
+        (propiedad_id, usuario['id'], texto, datetime.now().strftime('%d/%m/%Y %H:%M'))
+    )
+    conn.commit()
+    conn.close()
+    flash('Solicitud de visita enviada. El asesor te contactará pronto.', 'success')
+    return redirect(f'/propiedad/{propiedad_id}')
+
 
 # ----------------- AUTENTICACIÓN -----------------
 
