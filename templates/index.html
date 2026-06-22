@@ -111,5 +111,34 @@
     </div>
     {% endif %}
 
+    <!-- ACERCA DE -->
+    <div class="seccion">
+        <div class="seccion-header">
+            <img src="{{ url_for('static', filename='img/logo.png') }}" alt="EstateSystem"
+                 style="height:64px;width:64px;object-fit:contain;border-radius:14px;margin-bottom:16px;box-shadow:0 4px 20px rgba(59,130,246,0.25);">
+            <h2 class="seccion-titulo">¿Qué es EstateSystem?</h2>
+            <p class="seccion-sub" style="max-width:600px;margin:0 auto;">
+                Somos la plataforma inmobiliaria digital de Paraguay. Conectamos compradores, inquilinos y asesores en un solo lugar, con herramientas modernas e inteligencia artificial para hacer más fácil cada paso del proceso.
+            </p>
+        </div>
+        <div class="pasos-grid" style="margin-top:0;">
+            <div class="paso-card">
+                <div class="paso-icono">🏠</div>
+                <h3 class="paso-titulo">Para compradores</h3>
+                <p class="paso-desc">Encontrá la propiedad ideal entre cientos de opciones, filtrá por ciudad, precio y tipo, y contactá al asesor directamente.</p>
+            </div>
+            <div class="paso-card">
+                <div class="paso-icono">📋</div>
+                <h3 class="paso-titulo">Para asesores</h3>
+                <p class="paso-desc">Publicá propiedades con IA, gestioná clientes y visitas, y accedé a estadísticas de tu cartera en tiempo real.</p>
+            </div>
+            <div class="paso-card">
+                <div class="paso-icono">🤖</div>
+                <h3 class="paso-titulo">Con IA integrada</h3>
+                <p class="paso-desc">Generá descripciones profesionales y obtené sugerencias de precio basadas en el mercado inmobiliario paraguayo.</p>
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>
