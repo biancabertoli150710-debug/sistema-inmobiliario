@@ -4,3 +4,4 @@ __pycache__/
 inmobiliaria.db
 static/uploads/*
 !static/uploads/.gitkeep
+!static/uploads/placeholder_*.jpg
