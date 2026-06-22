@@ -641,10 +641,11 @@ def acerca_de():
 @app.route('/mapa')
 def mapa():
     conn = get_db()
-    propiedades = conn.execute(
+    rows = conn.execute(
         "SELECT id, nombre, tipo, operacion, precio, latitud, longitud FROM propiedades WHERE latitud IS NOT NULL AND longitud IS NOT NULL"
     ).fetchall()
     conn.close()
+    propiedades = [dict(r) for r in rows]
     return render_template("mapa.html", propiedades=propiedades)
 
 
