@@ -389,6 +389,44 @@ def eliminar(id):
     return redirect('/propiedades')
 
 
+@app.route('/favorito/<int:id>', methods=['POST'])
+def toggle_favorito(id):
+    if not usuario_logueado():
+        flash('Debes iniciar sesión para guardar favoritos.', 'warning')
+        return redirect('/login')
+
+    conn = get_db()
+    usuario = conn.execute("SELECT id FROM usuarios WHERE email = ?", (session['usuario'],)).fetchone()
+    fav = conn.execute("SELECT id FROM favoritos WHERE usuario_id = ? AND propiedad_id = ?", (usuario['id'], id)).fetchone()
+
+    if fav:
+        conn.execute("DELETE FROM favoritos WHERE id = ?", (fav['id'],))
+        flash('Eliminado de favoritos.', 'success')
+    else:
+        conn.execute("INSERT INTO favoritos (usuario_id, propiedad_id) VALUES (?, ?)", (usuario['id'], id))
+        flash('Agregado a favoritos.', 'success')
+
+    conn.commit()
+    conn.close()
+    return redirect(f'/propiedad/{id}')
+
+
+@app.route('/favoritos')
+def favoritos():
+    if not usuario_logueado():
+        flash('Debes iniciar sesión para ver tus favoritos.', 'warning')
+        return redirect('/login')
+
+    conn = get_db()
+    usuario = conn.execute("SELECT id FROM usuarios WHERE email = ?", (session['usuario'],)).fetchone()
+    props = conn.execute(
+        "SELECT p.* FROM propiedades p JOIN favoritos f ON p.id = f.propiedad_id WHERE f.usuario_id = ?",
+        (usuario['id'],)
+    ).fetchall()
+    conn.close()
+    return render_template("favoritos.html", propiedades=props)
+
+
 @app.route('/perfil')
 def perfil():
     if not usuario_logueado():
