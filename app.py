@@ -722,9 +722,9 @@ Datos de la propiedad:
 - Precio: USD {precio or 'A consultar'}"""
 
     modelos = [
-        "meta-llama/llama-3.2-3b-instruct:free",
-        "google/gemma-3-4b-it:free",
-        "mistralai/mistral-7b-instruct:free",
+        "google/gemma-4-26b-a4b-it:free",
+        "google/gemma-4-31b-it:free",
+        "liquid/lfm-2.5-1.2b-instruct:free",
     ]
 
     for modelo in modelos:
@@ -794,9 +794,9 @@ Propiedad:
 - Habitaciones: {habitaciones or 'No especificado'}"""
 
     modelos = [
-        "meta-llama/llama-3.2-3b-instruct:free",
-        "google/gemma-3-4b-it:free",
-        "mistralai/mistral-7b-instruct:free",
+        "google/gemma-4-26b-a4b-it:free",
+        "google/gemma-4-31b-it:free",
+        "liquid/lfm-2.5-1.2b-instruct:free",
     ]
 
     for modelo in modelos:
