@@ -165,13 +165,11 @@
                 <button type="submit" style="margin-top:8px;">Enviar consulta</button>
             </form>
 
-            {% set consultas_normales = consultas | selectattr('pregunta', 'defined') | rejectattr('pregunta', 'match', '^\[SOLICITUD DE VISITA\]') | list %}
-            {% set solicitudes = consultas | selectattr('pregunta', 'match', '^\[SOLICITUD DE VISITA\]') | list %}
-
-            {% if consultas_normales %}
+            {% if consultas %}
             <div style="margin-top:20px;">
                 <span class="detalle-label">Tus consultas anteriores</span>
-                {% for c in consultas_normales %}
+                {% for c in consultas %}
+                {% if not c.pregunta.startswith('[SOLICITUD DE VISITA]') %}
                 <div style="background:#111827; border-radius:8px; padding:14px; margin-top:10px;">
                     <p style="color:#e2e8f0; text-align:left; margin-bottom:8px;">❓ {{ c.pregunta }}</p>
                     {% if c.respuesta %}
@@ -180,23 +178,29 @@
                     <p style="color:#64748b; font-size:13px; text-align:left;">⏳ Esperando respuesta del asesor...</p>
                     {% endif %}
                 </div>
+                {% endif %}
                 {% endfor %}
             </div>
-            {% endif %}
 
-            {% if solicitudes %}
-            <div style="margin-top:20px;">
+            <div style="margin-top:16px;">
                 <span class="detalle-label">Tus solicitudes de visita</span>
-                {% for s in solicitudes %}
+                {% set tiene_solicitudes = [] %}
+                {% for c in consultas %}
+                {% if c.pregunta.startswith('[SOLICITUD DE VISITA]') %}
+                {% set _ = tiene_solicitudes.append(1) %}
                 <div style="background:#111827; border-radius:8px; padding:14px; margin-top:10px;">
-                    <p style="color:#e2e8f0; text-align:left; margin-bottom:8px;">📅 {{ s.pregunta | replace('[SOLICITUD DE VISITA] ', '') }}</p>
-                    {% if s.respuesta %}
-                    <p style="color:#86efac; text-align:left; background:#052e16; padding:10px; border-radius:6px;">✅ {{ s.respuesta }}</p>
+                    <p style="color:#e2e8f0; text-align:left; margin-bottom:8px;">📅 {{ c.pregunta.replace('[SOLICITUD DE VISITA] ', '') }}</p>
+                    {% if c.respuesta %}
+                    <p style="color:#86efac; text-align:left; background:#052e16; padding:10px; border-radius:6px;">✅ {{ c.respuesta }}</p>
                     {% else %}
                     <p style="color:#64748b; font-size:13px; text-align:left;">⏳ El asesor confirmará la visita pronto...</p>
                     {% endif %}
                 </div>
+                {% endif %}
                 {% endfor %}
+                {% if not tiene_solicitudes %}
+                <p style="color:#64748b; font-size:13px; margin-top:8px;">No enviaste solicitudes de visita aún.</p>
+                {% endif %}
             </div>
             {% endif %}
         </div>

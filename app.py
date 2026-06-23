@@ -721,30 +721,21 @@ Datos de la propiedad:
 - Habitaciones: {habitaciones or 'No especificado'}
 - Precio: USD {precio or 'A consultar'}"""
 
-    payload = json.dumps({
-        "model": "google/gemma-4-26b-a4b-it:free",
-        "messages": [{"role": "user", "content": prompt}],
-        "max_tokens": 1000
-    }).encode('utf-8')
+    modelos = [
+        "meta-llama/llama-3.2-3b-instruct:free",
+        "google/gemma-3-4b-it:free",
+        "mistralai/mistral-7b-instruct:free",
+    ]
 
-    req = urllib.request.Request(
-        'https://openrouter.ai/api/v1/chat/completions',
-        data=payload,
-        headers={
-            'Content-Type': 'application/json',
-            'Authorization': f'Bearer {API_KEY}'
-        }
-    )
+    for modelo in modelos:
+        payload = json.dumps({
+            "model": modelo,
+            "messages": [{"role": "user", "content": prompt}],
+            "max_tokens": 1000
+        }).encode('utf-8')
 
-    for intento in range(4):
-        try:
-            with urllib.request.urlopen(req) as response:
-                resultado = json.loads(response.read())
-                descripcion = resultado['choices'][0]['message']['content']
-                return {'descripcion': descripcion}
-        except urllib.error.HTTPError as e:
-            if e.code == 429 and intento < 3:
-                time.sleep(7)
+        for intento in range(3):
+            try:
                 req = urllib.request.Request(
                     'https://openrouter.ai/api/v1/chat/completions',
                     data=payload,
@@ -753,11 +744,19 @@ Datos de la propiedad:
                         'Authorization': f'Bearer {API_KEY}'
                     }
                 )
-            else:
-                return {'error': f'Error HTTP {e.code}'}, 500
-        except Exception as e:
-            return {'error': str(e)}, 500
-    return {'error': 'Demasiadas solicitudes, intenta de nuevo en unos segundos.'}, 429
+                with urllib.request.urlopen(req, timeout=30) as response:
+                    resultado = json.loads(response.read())
+                    descripcion = resultado['choices'][0]['message']['content']
+                    return {'descripcion': descripcion}
+            except urllib.error.HTTPError as e:
+                if e.code == 429 and intento < 2:
+                    time.sleep(5)
+                else:
+                    break
+            except Exception:
+                break
+
+    return {'error': 'No se pudo generar la descripción. Intentá de nuevo en unos segundos.'}, 503
 
 @app.route('/acerca-de')
 def acerca_de():
@@ -794,34 +793,42 @@ Propiedad:
 - Operación: {operacion}
 - Habitaciones: {habitaciones or 'No especificado'}"""
 
-    payload = json.dumps({
-        "model": "google/gemma-4-26b-a4b-it:free",
-        "messages": [{"role": "user", "content": prompt}],
-        "max_tokens": 100
-    }).encode('utf-8')
+    modelos = [
+        "meta-llama/llama-3.2-3b-instruct:free",
+        "google/gemma-3-4b-it:free",
+        "mistralai/mistral-7b-instruct:free",
+    ]
 
-    for intento in range(4):
-        try:
-            req = urllib.request.Request(
-                'https://openrouter.ai/api/v1/chat/completions',
-                data=payload,
-                headers={
-                    'Content-Type': 'application/json',
-                    'Authorization': f'Bearer {API_KEY}'
-                }
-            )
-            with urllib.request.urlopen(req) as response:
-                resultado = json.loads(response.read())
-                sugerencia = resultado['choices'][0]['message']['content']
-                return {'sugerencia': sugerencia}
-        except urllib.error.HTTPError as e:
-            if e.code == 429 and intento < 3:
-                time.sleep(7)
-            else:
-                return {'error': f'Error HTTP {e.code}'}, 500
-        except Exception as e:
-            return {'error': str(e)}, 500
-    return {'error': 'Demasiadas solicitudes, intenta de nuevo.'}, 429
+    for modelo in modelos:
+        payload = json.dumps({
+            "model": modelo,
+            "messages": [{"role": "user", "content": prompt}],
+            "max_tokens": 150
+        }).encode('utf-8')
+
+        for intento in range(3):
+            try:
+                req = urllib.request.Request(
+                    'https://openrouter.ai/api/v1/chat/completions',
+                    data=payload,
+                    headers={
+                        'Content-Type': 'application/json',
+                        'Authorization': f'Bearer {API_KEY}'
+                    }
+                )
+                with urllib.request.urlopen(req, timeout=30) as response:
+                    resultado = json.loads(response.read())
+                    sugerencia = resultado['choices'][0]['message']['content']
+                    return {'sugerencia': sugerencia}
+            except urllib.error.HTTPError as e:
+                if e.code == 429 and intento < 2:
+                    time.sleep(5)
+                else:
+                    break
+            except Exception:
+                break
+
+    return {'error': 'No se pudo estimar el precio. Intentá de nuevo en unos segundos.'}, 503
 
 
 @app.route('/consultar/<int:propiedad_id>', methods=['POST'])
