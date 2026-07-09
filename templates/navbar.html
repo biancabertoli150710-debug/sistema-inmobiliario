@@ -1,5 +1,11 @@
 <nav class="navbar">
-    <ul>
+    <button class="navbar-toggle" id="navbar-toggle" aria-label="Menú" onclick="toggleNav()">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+
+    <ul id="nav-principal">
         <li><a href="/">Inicio</a></li>
         <li><a href="/propiedades">Propiedades</a></li>
         <li><a href="/mapa">🗺️ Mapa</a></li>
@@ -8,7 +14,7 @@
         {% endif %}
     </ul>
 
-    <ul class="nav-auth">
+    <ul class="nav-auth" id="nav-auth">
         {% if session.get('usuario') %}
             <li class="nav-usuario">
                 <span>
@@ -34,6 +40,15 @@
         {% endif %}
     </ul>
 </nav>
+
+<script>
+function toggleNav() {
+    var p = document.getElementById('nav-principal');
+    var a = document.getElementById('nav-auth');
+    p.classList.toggle('nav-open');
+    a.classList.toggle('nav-open');
+}
+</script>
 
 <!-- Mensajes flash -->
 {% with messages = get_flashed_messages(with_categories=true) %}
