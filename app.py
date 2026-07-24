@@ -666,7 +666,8 @@ def cambiar_estado_visita(id, estado):
         return redirect('/visitas')
 
     conn = get_db()
-    conn.execute("UPDATE visitas SET estado = ? WHERE id = ?", (estado, id))
+    usuario = conn.execute("SELECT id FROM usuarios WHERE email = ?", (session['usuario'],)).fetchone()
+    conn.execute("UPDATE visitas SET estado = ? WHERE id = ? AND asesor_id = ?", (estado, id, usuario['id']))
     conn.commit()
     conn.close()
 
@@ -680,7 +681,8 @@ def eliminar_visita(id):
         return redirect('/')
 
     conn = get_db()
-    conn.execute("DELETE FROM visitas WHERE id = ?", (id,))
+    usuario = conn.execute("SELECT id FROM usuarios WHERE email = ?", (session['usuario'],)).fetchone()
+    conn.execute("DELETE FROM visitas WHERE id = ? AND asesor_id = ?", (id, usuario['id']))
     conn.commit()
     conn.close()
 
@@ -1092,6 +1094,14 @@ def logout():
 # ----------------- EJECUTAR SERVIDOR -----------------
 
 init_db()
+
+# Poblar con datos de ejemplo si la base está vacía
+conn = get_db()
+tiene_datos = conn.execute("SELECT COUNT(*) FROM propiedades").fetchone()[0]
+conn.close()
+if tiene_datos == 0:
+    from seed import seed
+    seed()
 
 if __name__ == "__main__":
     app.run(debug=True, port=8080)
