@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, redirect, session, flash
+from whitenoise import WhiteNoise
 import os
 import sqlite3
 import urllib.request
@@ -13,6 +14,7 @@ load_dotenv()
 
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY', 'estate_system_fallback_key_2024')
+app.wsgi_app = WhiteNoise(app.wsgi_app, root='static/', prefix='static')
 
 UPLOAD_FOLDER = 'static/uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
