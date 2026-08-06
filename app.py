@@ -12,16 +12,16 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-app = Flask(__name__)
-app.secret_key = os.getenv('SECRET_KEY', 'estate_system_fallback_key_2024')
-app.wsgi_app = WhiteNoise(app.wsgi_app, root='static/', prefix='static')
-
-UPLOAD_FOLDER = 'static/uploads'
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATABASE = os.path.join(BASE_DIR, 'inmobiliaria.db')
 API_KEY = os.getenv('OPENROUTER_API_KEY')
+
+UPLOAD_FOLDER = 'static/uploads'
+
+app = Flask(__name__)
+app.secret_key = os.getenv('SECRET_KEY', 'estate_system_fallback_key_2024')
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.wsgi_app = WhiteNoise(app.wsgi_app, root=os.path.join(BASE_DIR, 'static'), prefix='static')
 
 
 # ----------------- BASE DE DATOS -----------------
@@ -642,6 +642,11 @@ def agregar_visita():
         fecha = request.form.get('fecha')
         hora = request.form.get('hora')
         notas = request.form.get('notas', '').strip()
+
+        if not propiedad_id or not cliente_id or not fecha or not hora:
+            conn.close()
+            flash('Completa todos los campos de la visita.', 'error')
+            return render_template("agregar_visita.html", propiedades=propiedades, clientes=clientes)
 
         conn.execute(
             "INSERT INTO visitas (propiedad_id, cliente_id, asesor_id, fecha, hora, notas, estado) VALUES (?, ?, ?, ?, ?, ?, ?)",
