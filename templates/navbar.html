@@ -1,53 +1,52 @@
 <nav class="navbar">
-    <a href="/" class="navbar-brand">🏠 EstateSystem</a>
-
     <button class="navbar-toggle" id="navbar-toggle" aria-label="Menú" onclick="toggleNav()">
         <span></span>
         <span></span>
         <span></span>
     </button>
 
-    <div class="nav-menu" id="nav-menu">
-        <ul id="nav-principal">
-            <li><a href="/">Inicio</a></li>
-            <li><a href="/propiedades">Propiedades</a></li>
-            <li><a href="/mapa">🗺️ Mapa</a></li>
-            {% if session.get('rol') == 'asesor' %}
-            <li><a href="/agregar">Agregar</a></li>
-            {% endif %}
-        </ul>
+    <ul id="nav-principal">
+        <li><a href="/">Inicio</a></li>
+        <li><a href="/propiedades">Propiedades</a></li>
+        <li><a href="/mapa">🗺️ Mapa</a></li>
+        {% if session.get('rol') == 'asesor' %}
+        <li><a href="/agregar">Agregar</a></li>
+        {% endif %}
+    </ul>
 
-        <ul class="nav-auth" id="nav-auth">
-            {% if session.get('usuario') %}
-                <li class="nav-usuario">
-                    <span>
-                        {% if session.get('rol') == 'asesor' %}🏠{% else %}🔍{% endif %}
-                        {{ session.get('nombre') }}
-                    </span>
-                </li>
-                {% if session.get('rol') == 'asesor' %}
-                    <li><a href="/estadisticas" class="btn-nav btn-registro">📊 Estadísticas</a></li>
-                    <li><a href="/clientes" class="btn-nav btn-registro">👥 Clientes</a></li>
-                    <li><a href="/visitas" class="btn-nav btn-registro">📅 Visitas</a></li>
-                    <li><a href="/consultas" class="btn-nav btn-registro">💬 Consultas</a></li>
-                    <li><a href="/calculadora" class="btn-nav btn-registro">🧮 Calculadora</a></li>
-                {% else %}
-                    <li><a href="/favoritos" class="btn-nav btn-registro">❤️ Favoritos</a></li>
-                    <li><a href="/calculadora-cliente" class="btn-nav btn-registro">🏦 Calculadora</a></li>
-                {% endif %}
-                <li><a href="/perfil" class="btn-nav btn-registro">Mi perfil</a></li>
-                <li><a href="/logout" class="btn-nav btn-logout">Cerrar sesión</a></li>
+    <ul class="nav-auth" id="nav-auth">
+        {% if session.get('usuario') %}
+            <li class="nav-usuario">
+                <span>
+                    {% if session.get('rol') == 'asesor' %}🏠{% else %}🔍{% endif %}
+                    {{ session.get('nombre') }}
+                </span>
+            </li>
+            {% if session.get('rol') == 'asesor' %}
+                <li><a href="/estadisticas" class="btn-nav btn-registro">📊 Estadísticas</a></li>
+                <li><a href="/clientes" class="btn-nav btn-registro">👥 Clientes</a></li>
+                <li><a href="/visitas" class="btn-nav btn-registro">📅 Visitas</a></li>
+                <li><a href="/consultas" class="btn-nav btn-registro">💬 Consultas</a></li>
+                <li><a href="/calculadora" class="btn-nav btn-registro">🧮 Calculadora</a></li>
             {% else %}
-                <li><a href="/registro" class="btn-nav btn-registro">Registrarse</a></li>
-                <li><a href="/login" class="btn-nav btn-login">Iniciar sesión</a></li>
+                <li><a href="/favoritos" class="btn-nav btn-registro">❤️ Favoritos</a></li>
+                <li><a href="/calculadora-cliente" class="btn-nav btn-registro">🏦 Calculadora</a></li>
             {% endif %}
-        </ul>
-    </div>
+            <li><a href="/perfil" class="btn-nav btn-registro">Mi perfil</a></li>
+            <li><a href="/logout" class="btn-nav btn-logout">Cerrar sesión</a></li>
+        {% else %}
+            <li><a href="/registro" class="btn-nav btn-registro">Registrarse</a></li>
+            <li><a href="/login" class="btn-nav btn-login">Iniciar sesión</a></li>
+        {% endif %}
+    </ul>
 </nav>
 
 <script>
 function toggleNav() {
-    document.getElementById('nav-menu').classList.toggle('nav-open');
+    var p = document.getElementById('nav-principal');
+    var a = document.getElementById('nav-auth');
+    p.classList.toggle('nav-open');
+    a.classList.toggle('nav-open');
 }
 </script>
 
