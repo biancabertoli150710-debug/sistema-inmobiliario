@@ -43,6 +43,9 @@ body{
     letter-spacing: 0.5px;
 }
 
+/* Ocultar hamburguesa en desktop */
+.navbar-toggle { display: none; }
+
 .hero-logo {
     width: 100px;
     height: 100px;
@@ -1292,12 +1295,8 @@ form button:hover{
         gap: 0;
     }
 
-    .solo-mobile {
+    .navbar-brand {
         display: inline-block !important;
-        font-size: 16px;
-        font-weight: bold;
-        color: #60a5fa !important;
-        text-decoration: none;
     }
 
     .navbar-toggle {
@@ -1558,7 +1557,4 @@ form button:hover{
     }
 }
 
-/* Desktop: ocultar hamburguesa y brand */
-.navbar-toggle { display: none; }
-.solo-mobile { display: none; }
 
