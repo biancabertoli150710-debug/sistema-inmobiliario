@@ -1552,3 +1552,15 @@ form button:hover{
 .navbar-toggle {
     display: none;
 }
+
+/* Ocultar brand en desktop, mostrar solo en mobile */
+.navbar-brand {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .navbar-brand {
+        display: inline-block;
+        flex: 1;
+    }
+}

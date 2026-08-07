@@ -10,31 +10,51 @@
 
     {% include 'navbar.html' %}
 
-    <form method="GET" action="/propiedades" style="text-align:center; margin:20px auto; max-width:900px; display:flex; flex-wrap:wrap; gap:10px; justify-content:center;">
-        <input type="text" name="q" placeholder="Buscar por ciudad o nombre" value="{{ request.args.get('q', '') }}">
+    <form method="GET" action="/propiedades" style="margin:24px auto; max-width:960px; padding:0 16px;">
+        <!-- Buscador principal -->
+        <div style="display:flex; gap:10px; margin-bottom:12px;">
+            <input type="text" name="q" placeholder="🔍 Buscar por ciudad o nombre..." value="{{ request.args.get('q', '') }}" style="flex:1; min-width:0;">
+            <button type="submit" style="white-space:nowrap;">Buscar</button>
+            <a href="/propiedades" style="padding:10px 16px; background:#1f2937; color:#94a3b8; border-radius:6px; text-decoration:none; font-size:14px; display:flex; align-items:center;">Limpiar</a>
+        </div>
+        <!-- Filtros -->
+        <div style="display:flex; flex-wrap:wrap; gap:10px;">
+            <select name="tipo" style="flex:1; min-width:140px;">
+                <option value="">-- Tipo --</option>
+                <option value="Casa" {% if request.args.get('tipo') == 'Casa' %}selected{% endif %}>Casa</option>
+                <option value="Apartamento" {% if request.args.get('tipo') == 'Apartamento' %}selected{% endif %}>Apartamento</option>
+                <option value="Terreno" {% if request.args.get('tipo') == 'Terreno' %}selected{% endif %}>Terreno</option>
+                <option value="Local comercial" {% if request.args.get('tipo') == 'Local comercial' %}selected{% endif %}>Local comercial</option>
+            </select>
 
-        <select name="tipo">
-            <option value="">-- Tipo --</option>
-            <option value="Casa" {% if request.args.get('tipo') == 'Casa' %}selected{% endif %}>Casa</option>
-            <option value="Apartamento" {% if request.args.get('tipo') == 'Apartamento' %}selected{% endif %}>Apartamento</option>
-            <option value="Terreno" {% if request.args.get('tipo') == 'Terreno' %}selected{% endif %}>Terreno</option>
-            <option value="Local comercial" {% if request.args.get('tipo') == 'Local comercial' %}selected{% endif %}>Local comercial</option>
-        </select>
+            <select name="operacion" style="flex:1; min-width:140px;">
+                <option value="">-- Operación --</option>
+                <option value="Venta" {% if request.args.get('operacion') == 'Venta' %}selected{% endif %}>Venta</option>
+                <option value="Alquiler" {% if request.args.get('operacion') == 'Alquiler' %}selected{% endif %}>Alquiler</option>
+            </select>
 
-        <select name="operacion">
-            <option value="">-- Operación --</option>
-            <option value="Venta" {% if request.args.get('operacion') == 'Venta' %}selected{% endif %}>Venta</option>
-            <option value="Alquiler" {% if request.args.get('operacion') == 'Alquiler' %}selected{% endif %}>Alquiler</option>
-        </select>
+            <select name="ciudad" style="flex:1; min-width:140px;">
+                <option value="">-- Ciudad --</option>
+                <option value="Asunción" {% if request.args.get('ciudad') == 'Asunción' %}selected{% endif %}>Asunción</option>
+                <option value="Encarnación" {% if request.args.get('ciudad') == 'Encarnación' %}selected{% endif %}>Encarnación</option>
+                <option value="Ciudad del Este" {% if request.args.get('ciudad') == 'Ciudad del Este' %}selected{% endif %}>Ciudad del Este</option>
+                <option value="Luque" {% if request.args.get('ciudad') == 'Luque' %}selected{% endif %}>Luque</option>
+            </select>
 
-        <select name="orden">
-            <option value="">-- Ordenar por precio --</option>
-            <option value="asc" {% if request.args.get('orden') == 'asc' %}selected{% endif %}>Precio: menor a mayor</option>
-            <option value="desc" {% if request.args.get('orden') == 'desc' %}selected{% endif %}>Precio: mayor a menor</option>
-        </select>
+            <select name="habitaciones" style="flex:1; min-width:140px;">
+                <option value="">-- Habitaciones --</option>
+                <option value="1" {% if request.args.get('habitaciones') == '1' %}selected{% endif %}>1 habitación</option>
+                <option value="2" {% if request.args.get('habitaciones') == '2' %}selected{% endif %}>2 habitaciones</option>
+                <option value="3" {% if request.args.get('habitaciones') == '3' %}selected{% endif %}>3 habitaciones</option>
+                <option value="4" {% if request.args.get('habitaciones') == '4' %}selected{% endif %}>4+ habitaciones</option>
+            </select>
 
-        <button type="submit">Buscar</button>
-        <a href="/propiedades" style="padding:10px 16px; background:#1f2937; color:#94a3b8; border-radius:6px; text-decoration:none; font-size:14px;">Limpiar</a>
+            <select name="orden" style="flex:1; min-width:160px;">
+                <option value="">-- Ordenar por precio --</option>
+                <option value="asc" {% if request.args.get('orden') == 'asc' %}selected{% endif %}>Precio: menor a mayor</option>
+                <option value="desc" {% if request.args.get('orden') == 'desc' %}selected{% endif %}>Precio: mayor a menor</option>
+            </select>
+        </div>
     </form>
 
     <!-- BARRA COMPARADOR -->

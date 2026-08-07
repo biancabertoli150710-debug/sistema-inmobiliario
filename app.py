@@ -227,6 +227,8 @@ def ver_propiedades():
     query = request.args.get('q', '')
     tipo = request.args.get('tipo', '')
     operacion = request.args.get('operacion', '')
+    ciudad = request.args.get('ciudad', '')
+    habitaciones = request.args.get('habitaciones', '')
     orden = request.args.get('orden', '')
 
     sql = "SELECT * FROM propiedades WHERE 1=1"
@@ -243,6 +245,17 @@ def ver_propiedades():
     if operacion:
         sql += " AND operacion = ?"
         params.append(operacion)
+
+    if ciudad:
+        sql += " AND ciudad = ?"
+        params.append(ciudad)
+
+    if habitaciones:
+        if habitaciones == '4':
+            sql += " AND habitaciones >= 4"
+        else:
+            sql += " AND habitaciones = ?"
+            params.append(int(habitaciones))
 
     if orden == 'asc':
         sql += " ORDER BY CAST(REPLACE(REPLACE(precio, ',', ''), '.', '') AS INTEGER) ASC"
