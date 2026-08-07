@@ -1291,7 +1291,7 @@ form button:hover{
         gap: 0;
     }
 
-    .navbar-brand {
+    .solo-mobile {
         display: inline-block !important;
         font-size: 16px;
         font-weight: bold;
@@ -1557,7 +1557,7 @@ form button:hover{
     }
 }
 
-/* Desktop: ocultar hamburguesa */
+/* Desktop: ocultar hamburguesa y brand */
 .navbar-toggle { display: none; }
-.navbar-brand { display: none; }
+.solo-mobile { display: none; }
 
