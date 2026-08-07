@@ -1548,18 +1548,7 @@ form button:hover{
     }
 }
 
-/* Ocultar hamburguesa y brand en desktop */
+/* Ocultar hamburguesa en desktop */
 .navbar-toggle {
     display: none;
-}
-
-.navbar-brand {
-    display: none !important;
-}
-
-@media (max-width: 768px) {
-    .navbar-brand {
-        display: inline-block !important;
-        flex: 1;
-    }
 }
