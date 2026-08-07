@@ -1286,12 +1286,16 @@ form button:hover{
     .navbar {
         padding: 14px 20px;
         flex-wrap: wrap;
-        min-height: 52px;
         justify-content: space-between;
+        align-items: center;
     }
 
     .navbar-brand {
-        display: inline-block !important;
+        display: inline-block;
+        font-size: 16px;
+        font-weight: bold;
+        color: #60a5fa;
+        text-decoration: none;
     }
 
     .navbar-toggle {
@@ -1552,7 +1556,6 @@ form button:hover{
     }
 }
 
-/* Ocultar hamburguesa en desktop */
-.navbar-toggle {
-    display: none;
-}
+/* Desktop: ocultar hamburguesa y brand del navbar */
+.navbar-toggle { display: none; }
+.navbar-brand { display: none; }
