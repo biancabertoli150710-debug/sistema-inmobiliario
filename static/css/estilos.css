@@ -1287,6 +1287,11 @@ form button:hover{
         padding: 14px 20px;
         flex-wrap: wrap;
         min-height: 52px;
+        justify-content: space-between;
+    }
+
+    .navbar-brand {
+        display: inline-block !important;
     }
 
     .navbar-toggle {
@@ -1298,7 +1303,6 @@ form button:hover{
         background: #1f2937;
         border: 1px solid #334155;
         border-radius: 6px;
-        margin-left: auto;
     }
 
     .navbar-toggle span {
